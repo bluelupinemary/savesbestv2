@@ -1,0 +1,86 @@
+.questionsDiv{
+	border-style:solid;
+	border-color: black;
+	height:80vh;
+	margin-top:3%;
+	margin-left:10%;
+	margin-right: 10%;
+
+	background-color: #fff; 
+	background-image: 
+	linear-gradient(90deg, transparent 79px, #abced4 79px, #abced4 81px, transparent 81px),
+	linear-gradient(#eee .1em, transparent .1em);
+	background-size: 100% 1.2em;
+}
+
+.bgStyle{
+	background-color: silver;
+	background-image: linear-gradient(335deg, #800 23px, transparent 23px),
+	linear-gradient(155deg, #900 23px, transparent 23px),
+	linear-gradient(335deg, #700 23px, transparent 23px),
+	linear-gradient(155deg, #900 23px, transparent 23px);
+	background-size: 58px 58px;	
+	background-position: 0px 2px, 4px 35px, 29px 31px, 34px 6px;
+}
+
+.pageTimerDiv{
+	font-size: 25px;
+	border-style:solid;
+	border-color: #ffa500;
+	background-color:black;
+	position:fixed;
+	right:0;
+	top:0;
+	margin-top:5%;
+	margin-right:5px;
+	color:white;
+	height:15vh;
+	width:120px;
+}
+
+
+
+.w3-button{border:none;display:inline-block;outline:0;padding:8px 16px;vertical-align:middle;overflow:hidden;text-decoration:none;color:inherit;background-color:inherit;text-align:center;cursor:pointer;white-space:nowrap}
+.w3-button{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+.w3-button{white-space:normal}
+.w3-black,.w3-hover-black:hover{color:#fff!important;background-color:#000!important}
+.w3-display-left{position:fixed;bottom:10%;left:12%;transform:translate(0%,-50%);-ms-transform:translate(-0%,-50%)}
+.w3-display-right{position:fixed;bottom:10%;right:12%;transform:translate(0%,-50%);-ms-transform:translate(0%,-50%)}
+.w3-display-middle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);-ms-transform:translate(-50%,-50%)}
+.w3-left, .w3-right, .w3-badge {cursor:pointer}
+.w3-center{text-align:center}
+.w3-center{text-align:center!important}
+.w3-badge {height:13px;width:13px;padding:0}
+.w3-content{max-width:980px;margin:auto;}
+.w3-container{padding:0.01em 16px}
+.w3-display-container{position:relative}
+.w3-center{display:inline-block;width:auto}
+.w3-section{margin-top:16px!important;margin-bottom:16px!important}
+.w3-large{font-size:18px!important}
+.w3-text-white{color:#fff!important}
+.w3-display-bottommiddle{position:absolute;left:50%;bottom:0;transform:translate(-50%,0%);-ms-transform:translate(-50%,0%)}
+.w3-left{float:left!important}
+.w3-right{float:right!important}
+.w3-badge{background-color:#000;color:#fff;display:inline-block;padding-left:8px;padding-right:8px;text-align:center}
+.w3-badge{border-radius:50%}
+.w3-border{border:1px solid #ccc!important}
+.w3-transparent{background-color:transparent!important}
+.w3-hover-white:hover{color:#000!important;background-color:#fff!important}
+.w3-white{color:#000!important;background-color:#fff!important}
+
+.mySlides{
+	 position:relative;
+	 text-align:center;
+	 font-size:30px;
+	 padding:10%;
+}
+
+.ansLabel{
+	font-size:30px;
+	text-align:left;
+}
+
+hr{
+	 border-type:solid;
+	 border-color:black;
+}

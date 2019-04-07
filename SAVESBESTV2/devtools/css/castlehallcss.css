@@ -1,0 +1,65 @@
+.herbologyMeetDiv {
+	 background-color:white;
+	 border-radius: 30px;
+	 border-style:solid;
+	 border-color:#202020;
+	 margin-left:15%;
+	 margin-right:15%;
+	 margin-top:8%;
+	 height:30vh;
+	 padding:20px;
+}
+/*.herbologyMeetDiv:hover{
+	opacity:1;
+	text-decoration: none;
+	color:black;
+	background-color: gold;
+  cursor: pointer;
+  -webkit-transition: background-color 2s ease-out;
+  -moz-transition: background-color 2s ease-out;
+  -o-transition: background-color 2s ease-out;
+  transition: background-color 2s ease-out;
+}*/
+
+p{text-align: center;}
+
+.expeditionDiv {
+	background-color:white;
+	 border-radius: 30px;
+	 border-style:solid;
+	 border-color:#202020;
+	 margin-left:15%;
+	 margin-right:15%;
+	 margin-top:8%;
+	 height:30vh;
+	 padding:20px;
+}
+
+
+.herbologyMeetDiv img {
+    display: block;
+    margin: auto;
+    width: 70%;
+    padding-top:20px;
+}
+
+.expeditionDiv img {
+    display: block;
+    margin: auto;
+    width: 60%;
+    padding-top:10px;
+}
+
+.divlink{
+	text-decoration: none;
+	color:black;
+}
+
+#hmeetdoor2:hover{
+	cursor: pointer;
+}
+
+#expeditiondoor2:hover{
+	cursor: pointer;
+}
+

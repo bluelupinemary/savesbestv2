@@ -1,0 +1,19 @@
+FILES MODIFIED: 
+view
+	login_view
+	login_view2
+	admin_home_view
+	list_consumer_view
+
+model
+	User (functions accessed)
+		-login
+		-getConsumers
+
+
+controller		
+	PHP FILE	FUNCTIONS
+	verifylogin2	- index, checkdatabase
+	login 		- index
+	home 		- login, listConsumer
+

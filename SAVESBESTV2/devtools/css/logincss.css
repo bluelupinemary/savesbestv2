@@ -1,0 +1,22 @@
+.panel-heading, .navbar{
+  background-image: linear-gradient(180deg, #edfbfc 0%, #a6e0f4 100%);
+  padding-top:0.5%;
+  padding-bottom:0.5%;
+}
+.sign-in-panel{
+    padding-right: 10%;
+    padding-bottom: 5%;
+    padding-top:2%;
+}
+
+h1 {
+  top: 5%;
+  font-size: 20px;
+  font-family: 'Open Sans', sans-serif;
+    text-align: center;
+}
+
+body {
+ padding-top: 10%;
+
+}

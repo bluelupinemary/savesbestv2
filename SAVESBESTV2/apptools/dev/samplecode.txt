@@ -1,0 +1,7 @@
+OPENBOX
+
+NUMBLK var1#
+
+var1 AS 3#
+
+CLOSEBOX
