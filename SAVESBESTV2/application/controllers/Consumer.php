@@ -829,9 +829,23 @@ function showImportedBillings(){
                             $pdf->SetFont('Arial','',12);
                             //Table with 20 rows and 4 columns
                             $pdf->SetWidths(array(30,30,30,30,30,30,30,20,20,30));
+
+                             $pdf->Image('/var/www/html/SAVESBESTV2/devtools/images/bill/uplb.png',10,10,20,18);
                             
-                           
+                            $pdf->Image('/var/www/html/SAVESBESTV2/devtools/images/bill/logo-trans.png',35,10,-300);
                             //filler; add new line
+                            $pdf->Cell(40,5,'',0,1,'L');
+                             
+                             //SAVESBEST HEADER
+                            $pdf->Cell(50,5,'',0,0,'L');
+                            $pdf->SetTextColor(13, 103, 133);
+                            $pdf->SetFont('Arial','B',14);
+                            $pdf->Cell(70,5,'Statement of Account',0,1,'L');
+
+                            $pdf->SetTextColor(0,0,0);
+                            $pdf->SetFont('Arial','',12);
+                             //filler; add new line
+                            $pdf->Cell(0,5,'',0,1,'L');
                             $pdf->Cell(0,5,'',0,1,'L');
                              //filler; add new line
                             $pdf->Cell(0,5,'',0,1,'L');

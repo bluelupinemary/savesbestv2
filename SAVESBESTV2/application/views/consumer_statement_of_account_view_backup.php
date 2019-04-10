@@ -81,78 +81,6 @@
         </form>
     </div><!--div reading date query form-->
 
-<?php
-    function getResult($results,$i){
-                                foreach($results as $result){
-                                  if($result['bill_month']==$i){
-                                     return $result;
-                                  }
-                                  return null;
-                                }
-    }
-
-     function showResultToTable($result,$i){
-            $mon = getMonth($i);
-            echo "<td>".$i."-".$mon."</td>";
-            echo "<td>".$result['electricity_reading']."</td>".
-                  "<td>".$result['electricity_amount_paid']."</td>".
-                 "<td>".$result['water_reading']."</td>".
-                 "<td>".$result['water_amount_paid']."</td>".
-                  "<td>".$result['garbage_fee']."</td>".
-                 "<td>".$result['garbage_amount_paid']."</td>".
-                  "<td>".$result['surcharge']."</td>".
-                 "<td>".$result['receipt_number']."</td>".
-                  "<td>".$result['receipt_date']."</td>";
-      }
-      function showEmptyRowToTable($i){
-            $mon = getMonth($i);
-            echo "<td>".$i."-".$mon."</td>".
-                  "<td></td>".
-                  "<td></td>".
-                 "<td></td>".
-                "<td></td>".
-                 "<td></td>".
-                 "<td></td>".
-                  "<td></td>".
-                 "<td></td>".
-                  "<td></td>";
-      }
-
-       function getMonth($i){
-             if($i==1){
-                  $month="Jan";
-              }else if($i==2){
-                  $month="Feb";
-              }else if($i==3){
-                  $month="Mar";
-              }else if($i==4){
-                  $month="Apr";
-              }else if($i==5){
-                  $month="May";
-              }else if($i==6){
-                  $month="Jun";
-              }else if($i==7){
-                  $month="Jul";
-              }else if($i==8){
-                  $month="Aug";
-              }else if($i==9){
-                  $month="Sep";
-              }else if($i==10){
-                  $month="Oct";
-              }else if($i==11){
-                  $month="Nov";
-              }else if($i==12){
-                  $month="Dec";
-              }
-              return $month;
-      }
-?>
-
-
-
-
-
-
     <div>
         <?php
        // echo "<br><br>OK: ".$ok;
@@ -177,46 +105,60 @@
                          </thead>
                            <tbody>';
 
-                                for($i=1;$i<=12;$i++){
-                                  echo "<tr style='font-size:1.3em;text-align:right;'>";
-                                  //if($i==1){
-                                    
-                                    $result = getResult($results,$i);
-                                    $count = count($result);
-                                    //echo "count: ",$count;
-                                    //print_r($result);
-                                    if($count > 0){
-                                        showResultToTable($result,$i);
-                                    }else{
-                                        showEmptyRowToTable($i);
-                                    }
-                                 // }else{
-                                 //     echo "<td>".$i."-</td>";
-                                 // }
-                                 
+                          
+                             
+                              //   $month='';
+                              //  $c = count($results);
+                              // echo "<br><br><br>ITOOOOO";
+                              // print_r($results);
+                                foreach($results as $result){
+                                  if($result['bill_month']==1){
+                                      $month="Jan";
+                                  }else if($result['bill_month']==2){
+                                      $month="Feb";
+                                  }else if($result['bill_month']==3){
+                                      $month="Mar";
+                                  }else if($result['bill_month']==4){
+                                      $month="Apr";
+                                  }else if($result['bill_month']==5){
+                                      $month="May";
+                                  }else if($result['bill_month']==6){
+                                      $month="Jun";
+                                  }else if($result['bill_month']==7){
+                                      $month="Jul";
+                                  }else if($result['bill_month']==8){
+                                      $month="Aug";
+                                  }else if($result['bill_month']==9){
+                                      $month="Sep";
+                                  }else if($result['bill_month']==10){
+                                      $month="Oct";
+                                  }else if($result['bill_month']==11){
+                                      $month="Nov";
+                                  }else if($result['bill_month']==12){
+                                      $month="Dec";
+                                  }
 
-                                          // // "<td>".$result['id']."</td>".
-                                          // "<td>".$result['bill_month'].'-'.$month."</td>".
-                                          //  "<td>".$result['electricity_reading']."</td>".
-                                          //  "<td>".$result['electricity_amount_paid']."</td>".
-                                          //  "<td>".$result['water_reading']."</td>".
-                                          //  "<td>".$result['water_amount_paid']."</td>".
-                                          //   "<td>".$result['garbage_fee']."</td>".
-                                          //  "<td>".$result['garbage_amount_paid']."</td>".
-                                          //   "<td>".$result['surcharge']."</td>".
-                                          //  "<td>".$result['receipt_number']."</td>".
-                                          //   "<td>".$result['receipt_date']."</td>".
-                                          //  //"<td>".$result['electricity_reading']."</td>".
+                                 // $consumer_array = array();
+                                  echo "<tr style='font-size:1.3em;'>".
+
+                                          // "<td>".$result['id']."</td>".
+                                          "<td>".$result['bill_month'].'-'.$month."</td>".
+                                           "<td>".$result['electricity_reading']."</td>".
+                                           "<td>".$result['electricity_amount_paid']."</td>".
+                                           "<td>".$result['water_reading']."</td>".
+                                           "<td>".$result['water_amount_paid']."</td>".
+                                            "<td>".$result['garbage_fee']."</td>".
+                                           "<td>".$result['garbage_amount_paid']."</td>".
+                                            "<td>".$result['surcharge']."</td>".
+                                           "<td>".$result['receipt_number']."</td>".
+                                            "<td>".$result['receipt_date']."</td>".
+                                           //"<td>".$result['electricity_reading']."</td>".
                                          
-                                  echo "</tr>";
+                                            "</tr>";
                                            //$i=$i+1;
                                          
 
-                                   
-                                }
-                              
-                                 // $consumer_array = array();
-                                  
+                                   }//end of foreach
                        echo '</tbody>
                            </table>
 
@@ -232,7 +174,7 @@
                        <?php
                        echo '<input type="hidden" name="account_no" id="account_no" value="'.$account_no.'"  />';
                         echo '<input type="hidden" name="year" id="year" value="'.$year.'"  />';
-                           echo "<button style='float:right;' data-toggle='tooltip' title='SAVE PAYMENT' type='submit' class='btn btn-warning'>DOWNLOAD SOA REPORT</button><br><br>";
+                           echo "<button style='float:right;' data-toggle='tooltip' title='SAVE PAYMENT' type='submit' class='btn btn-warning'>DOWNLOAD SOA REPORT</button>";
                                 //echo form_button($delete_button);
                        "</form></div>";
                       echo form_close();
