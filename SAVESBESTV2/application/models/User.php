@@ -582,7 +582,7 @@
 
  		function get_collections_for_edit_by_account($account_no, $month, $year){
 	
-			$query = $this->db->query("select a.id,b.fullname as fullname,b.address,b.consumer_type,b.account_no, c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, month(receipt_date) as payment_month, year(receipt_date) as payment_year, c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where b.account_no=".$account_no." and month(receipt_date)=".$month." and year(receipt_date)=".$year);
+			$query = $this->db->query("select a.id,b.fullname as fullname,b.address,b.consumer_type,b.account_no, c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, month(receipt_date) as payment_month, year(receipt_date) as payment_year, c.surcharge,c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where b.account_no=".$account_no." and month(receipt_date)=".$month." and year(receipt_date)=".$year);
 
 			return $query->result_array();
 
@@ -671,13 +671,14 @@
 	  			}
   		}
 
-  		function update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$receiptNo,$receiptDate,$date_updated,$updated_by){
+  		function update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$surcharge,$receiptNo,$receiptDate,$date_updated,$updated_by){
 
   			$data=array(
 
 		    		'electricity_amount_paid'=>$electricity,
 		    		'water_amount_paid'=>$water,
 		    		'garbage_amount_paid'=>$garbage,
+		    		'surcharge'=>$surcharge,
 		    		'receipt_number'=>$receiptNo,
 		    		'receipt_date'=>$receiptDate,
 		    		'date_updated'=>$date_updated,
@@ -738,7 +739,7 @@
 
  		function get_yearly_collections_for_report_view($year,$account_no){
 			//echo "<br><br>ditooooooooo";
-			$query = $this->db->query("select a.bill_month, a.electricity_reading, a.water_reading, a.garbage_fee, b.fullname,b.address,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where a.bill_year=".$year." and b.account_no=".$account_no);
+			$query = $this->db->query("select a.bill_month, a.electricity_reading, a.water_reading, a.garbage_fee, b.fullname,b.address,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, c.surcharge, c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where a.bill_year=".$year." and b.account_no=".$account_no);
 
 			return $query->result_array();
 

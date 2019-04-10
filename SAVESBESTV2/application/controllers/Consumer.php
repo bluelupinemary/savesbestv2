@@ -710,6 +710,7 @@ function showImportedBillings(){
                      $electricity = $this->input->post('electricity_amount_paid');
                      $water = $this->input->post('water_amount_paid');
                      $garbage = $this->input->post('garbage_amount_paid');
+                     $surcharge = $this->input->post('surcharge');
                      $receiptNo = $this->input->post('receipt_no');
                      $receiptDate = $this->input->post('receipt_date');
                      $updated_by = $data['username'];
@@ -722,11 +723,15 @@ function showImportedBillings(){
                      // echo "<br>".$receiptNo;
                      // echo "<br>".$receiptDate;
                     $date_updated = date('Y-m-d');         
-                   $this->user->update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$receiptNo,$receiptDate,$date_updated,$updated_by);
+                   $this->user->update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$surcharge,$receiptNo,$receiptDate,$date_updated,$updated_by);
 
                    //$resultdata['results'] = $this->user->get_collections_for_edit($bill_id);
                   //$resultdata['results'] =  $resultdata['username'] = $data['username'];
                 $resultdata['results'] = $this->user->get_collections_for_edit_by_account($account_no,$month,$year);
+                $resultdata['account_no'] = $account_no;
+                $resultdata['payment_month'] = $month;
+                $resultdata['payment_year'] = $year;
+
                 $count = count($resultdata['results']);
                // echo "<br><br>COUNT: ".$count;
                 if($count > 0){
@@ -823,7 +828,7 @@ function showImportedBillings(){
                             $pdf->AddPage('L','A4',0);
                             $pdf->SetFont('Arial','',12);
                             //Table with 20 rows and 4 columns
-                            $pdf->SetWidths(array(40,30,30,30,30,30,30,30,30));
+                            $pdf->SetWidths(array(30,30,30,30,30,30,30,20,20,30));
                             
                            
                             //filler; add new line
@@ -847,23 +852,24 @@ function showImportedBillings(){
                             //filler; add new line
                             $pdf->Cell(0,5,'',0,1,'L');
                             //table headers
-                            $pdf->Cell(40,10,'MONTH/PERIOD ',1,0,'C');
+                            $pdf->Cell(30,10,'MONTH/PERIOD ',1,0,'C');
                             $pdf->Cell(60,10,'ELECTRIC ',1,0,'C');
                             $pdf->Cell(60,10,'WATER ',1,0,'C');
                             $pdf->Cell(60,10,'GARBAGE ',1,0,'C');
-                            $pdf->Cell(60,10,'',1,0,'C');
+                            $pdf->Cell(70,10,'',1,0,'C');
                             //filler; add new line
                             $pdf->Cell(0,10,'',0,1,'L');
 
-                            $pdf->Cell(40,10,''.$year,1,0,'C');
+                            $pdf->Cell(30,10,''.$year,1,0,'C');
                             $pdf->Cell(30,10,'ACTUAL COST ',1,0,'C');
                             $pdf->Cell(30,10,'PAYMENT',1,0,'C');
                             $pdf->Cell(30,10,'ACTUAL COST ',1,0,'C');
                             $pdf->Cell(30,10,'PAYMENT',1,0,'C');
                             $pdf->Cell(30,10,'ACTUAL COST ',1,0,'C');
                             $pdf->Cell(30,10,'PAYMENT',1,0,'C');
-                            $pdf->Cell(30,10,'O.R. NUMBER',1,0,'C');
-                            $pdf->Cell(30,10,'O.R. DATE',1,0,'C');
+                            $pdf->Cell(20,10,'SURCH',1,0,'C');
+                            $pdf->Cell(20,10,'OR. NO.',1,0,'C');
+                            $pdf->Cell(30,10,'OR. DATE',1,0,'C');
                            
                              //filler; add new line
                             $pdf->Cell(0,10,'',0,1,'L');
@@ -874,37 +880,37 @@ function showImportedBillings(){
                             //less than 12 (12 months)
                             for($i=0;$i<=16;$i++){
                                 if($i==0){
-                                    $pdf->Row(array("BALANCE  ".($year-1),"-","","","","","","",""));
+                                    $pdf->Row(array("BALANCE  ".($year-1),"-","","","","","","","",""));
                                 }if($i==1){
-                                    $pdf->Row(array("JANUARY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("JANUARY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==2){
-                                    $pdf->Row(array("FEBRUARY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("FEBRUARY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==3){
-                                    $pdf->Row(array("MARCH",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("MARCH",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==4){
-                                    $pdf->Row(array("APRIL",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("APRIL",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==5){
-                                    $pdf->Row(array("MAY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("MAY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==6){
-                                    $pdf->Row(array("JUNE",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("JUNE",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==7){
-                                    $pdf->Row(array("JULY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("JULY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==8){
-                                    $pdf->Row(array("AUGUST",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("AUGUST",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==9){
-                                    $pdf->Row(array("SEPTEMBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("SEPTEMBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==10){
-                                    $pdf->Row(array("OCTOBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("OCTOBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==11){
-                                    $pdf->Row(array("NOVEMBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("NOVEMBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==12){
-                                    $pdf->Row(array("DECEMBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("DECEMBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
                                 }if($i==14){
-                                    $pdf->Row(array("TOTAL",getTotalElectricBill($results),getTotalElectricPaid($results),getTotalWaterBill($results),getTotalWaterPaid($results),getTotalGarbageBill($results),getTotalGarbagePaid($results),"",""));
+                                    $pdf->Row(array("TOTAL",getTotalElectricBill($results),getTotalElectricPaid($results),getTotalWaterBill($results),getTotalWaterPaid($results),getTotalGarbageBill($results),getTotalGarbagePaid($results),"","",""));
                                 }if($i==15){
-                                    $pdf->Row(array("BALANCE",getElectricBalance($results),"",getWaterBalance($results),"",getGarbageBalance($results),"","",""));
+                                    $pdf->Row(array("BALANCE",getElectricBalance($results),"",getWaterBalance($results),"",getGarbageBalance($results),"","","",""));
                                 }if($i==16){
-                                    $pdf->Row(array("BALANCE ".$year,getYearBalance($results),"","","","","","",""));
+                                    $pdf->Row(array("BALANCE ".$year,getYearBalance($results),"","","","","","","",""));
                                 }
                             }
 
@@ -1107,24 +1113,7 @@ var $aligns;
     }
 }
 
-                
-function GenerateWord(){
-    //Get a random word
-    $nb=rand(3,10);
-    $w='';
-    for($i=1;$i<=$nb;$i++)
-        $w.=chr(rand(ord('a'),ord('z')));
-    return $w;
-}
-
-function GenerateSentence(){
-    //Get a random sentence
-    $nb=rand(1,10);
-    $s='';
-    for($i=1;$i<=$nb;$i++)
-        $s.=GenerateWord().' ';
-    return substr($s,0,-1);
-}
+     
 
 function getElectricBill($month,$results){
     for($i=0;$i<count($results);$i++){
@@ -1185,6 +1174,17 @@ function getGarbagePaid($month,$results){
     }
     return "";
 }
+
+function getSurcharge($month,$results){
+    for($i=0;$i<count($results);$i++){
+        $temp = intval($results[$i]['bill_month']);
+        if($temp==intval($month)){
+            return $results[$i]['surcharge'];
+        }
+    }
+    return "";
+}
+
 function getORNumber($month,$results){
     for($i=0;$i<count($results);$i++){
         $temp = intval($results[$i]['bill_month']);

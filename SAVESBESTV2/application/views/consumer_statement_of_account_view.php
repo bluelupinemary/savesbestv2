@@ -96,7 +96,7 @@
                 echo '<thead>
                           <tr>
                                <th rowspan="2">Month/Period<br>'.$year.'</th><th colspan="2"><center>Electricity</th><th colspan="2"><center>Water</th>
-                               <th colspan="2"><center>Garbage</th><th rowspan="2"><center>OR No</th><th rowspan="2"><center>OR Date</th>
+                               <th colspan="2"><center>Garbage</th><th rowspan="2"><center>Surcharge</th><th rowspan="2"><center>OR No</th><th rowspan="2"><center>OR Date</th>
                            </tr>
                            <tr>
                                <th>ACTUAL COST</th><th>PAYMENT</th><th>ACTUAL COST</th><th>PAYMENT</th>
@@ -149,6 +149,7 @@
                                            "<td>".$result['water_amount_paid']."</td>".
                                             "<td>".$result['garbage_fee']."</td>".
                                            "<td>".$result['garbage_amount_paid']."</td>".
+                                            "<td>".$result['surcharge']."</td>".
                                            "<td>".$result['receipt_number']."</td>".
                                             "<td>".$result['receipt_date']."</td>".
                                            //"<td>".$result['electricity_reading']."</td>".

@@ -91,7 +91,7 @@
                                <th>Bill<br>ID</th><th>Name</th><th>Address</th><th>Con.Type</th>
                                <th>Month</th><th>Year</th><th>Electricity<br>Amt. Paid</th>
                                <th>Water<br>Amt. Paid</th><th>Garbage<br>Amt. Paid</th>
-                               <th>OR.No.</th><th>OR.Date</th>
+                                <th>Surcharge</th><th>OR.No.</th><th>OR.Date</th>
 
                            </tr>
                          </thead>
@@ -144,10 +144,13 @@
                                            //"<td>".$result['water_reading']."</td>".
                                            "<td><input type='text' size='7' name='water_amount_paid' id='water_amount_paid' value='".$result['water_amount_paid']."'></td>".
                                            //"<td>".$result['garbage_fee']."</td>".
-                                           "<td><input type='text' size='5' name='garbage_amount_paid' id='garbage_amount_paid' value='".$result['garbage_amount_paid']."'></td>".
-                                           "<td><input type='text' size='7' name='receipt_no' id='receipt_no' value='".$result['receipt_number']."'></td>".
+                                           "<td><input type='text' size='4' name='garbage_amount_paid' id='garbage_amount_paid' value='".$result['garbage_amount_paid']."'></td>".
+
+                                           "<td><input type='text' size='4' name='surcharge' id='surcharge' value='".$result['surcharge']."'></td>".
+
+                                           "<td><input type='text' size='4' name='receipt_no' id='receipt_no' value='".$result['receipt_number']."'></td>".
                                   
-                                           "<td><input type='date' size='5' name='receipt_date' id='receipt_date' value='".$result['receipt_date']."'><input type='hidden' name='bill_id' id='bill_id' value=' ".$result['id']." ' /></td>".
+                                           "<td><input type='date' size='4' name='receipt_date' id='receipt_date' value='".$result['receipt_date']."'><input type='hidden' name='bill_id' id='bill_id' value=' ".$result['id']." ' /></td>".
                                             "</tr>";
                                            //$i=$i+1;
                                          

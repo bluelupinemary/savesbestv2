@@ -179,7 +179,7 @@
                     <li>
                         <a href="<?php echo site_url('home/queryCollectionToView') ?>">
                           <img src="<?php echo base_url();?>devtools/images/edit_collection.png" width="100px" height="100px" alt="image goes here"></img>
-                          <span class="text-content"><span>EDIT COLLECTION</span></span>
+                          <span class="text-content"><span>EDIT COLLECTION / ADD SURCHARGE</span></span>
                         </a>
                     </li>
                     <li>
