@@ -1,0 +1,35 @@
+TO DO: 
+
+1. SETUP SERVER
+INSTALL LAMP, APACHE, PHP, MYSQL 
+
+https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-on-ubuntu-16-04
+
+2. modify: php.ini file from /etc/php5/apache2/php.ini
+
+> enable and set:
+	> max_input_time =  120
+	> max_input_vars = 10000
+	> memory_limit = 256M
+
+
+3. ADD FILES to var/www/html/ directory. SETUP THE database. 
+	> setup database user: root, password: useruser
+	> create the database savesbest2
+	> import the data: mysql -u root -puseruser savesbestv2 < database_backup_name.sql
+	> CHECK IF CONSUMERS from Ivy is the same with savesbestv2 database
+
+4. CHMOD the devtools directory
+
+5. setup config.php (application/config/config.php) to the ip address of the server/computer (ask for a static ip from ITC for the server)
+	> change base_url part
+
+6. setup the database (application/config/database.php)
+
+7. ADD CODES to Ivy's system. FIX ABSOLUTE PATHS
+
+8. FIX ABSOLUTE PATHS OF THE FOLLOWING FILES in savesbest v2:
+	>
+	
+
+
