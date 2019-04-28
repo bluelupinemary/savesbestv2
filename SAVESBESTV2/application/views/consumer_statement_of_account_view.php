@@ -32,6 +32,7 @@
 
 
     <div style="margin-left:5%;">
+      <h4 style="color:darkgreen;"><b>Print Statement of Account Page</b></h4>
       <p>This page will allow you to CHECK and PRINT a consumers' STATEMENT OF ACCOUNT given the account no and desired year.</p>
       <h4>Please select the SOA year: </h4>
     </div>
@@ -83,12 +84,12 @@
 
 <?php
     function getResult($results,$i){
-                                foreach($results as $result){
-                                  if($result['bill_month']==$i){
-                                     return $result;
-                                  }
-                                  return null;
-                                }
+            foreach($results as $result){
+                if((int)$result['bill_month']==$i){
+                     return $result;
+                }
+            }
+            return null;
     }
 
      function showResultToTable($result,$i){
@@ -176,15 +177,15 @@
                            </tr>
                          </thead>
                            <tbody>';
-
+                      
                                 for($i=1;$i<=12;$i++){
                                   echo "<tr style='font-size:1.3em;text-align:right;'>";
                                   //if($i==1){
-                                    
+                                    //echo "i = "+$i;
                                     $result = getResult($results,$i);
                                     $count = count($result);
                                     //echo "count: ",$count;
-                                    //print_r($result);
+                                  // print_r($result);
                                     if($count > 0){
                                         showResultToTable($result,$i);
                                     }else{

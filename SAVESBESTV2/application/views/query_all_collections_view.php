@@ -32,6 +32,7 @@
 
 
     <div class= "container" style="margin-left:5%;">
+       <h4 style="color:darkgreen;"><b>View Collection Page</b></h4>
       <p>This page will allow you to VIEW consumers' collection entry given the selected PAYMENT/COLLECTION month and year.</p>
       <h4>Please enter the PAYMENT/COLLECTION MONTH and YEAR to view the collection: </h4>
     </div>
@@ -92,7 +93,7 @@
 
                                <th>Bill<br>ID</th><th>Name</th><th>Address</th><th>Con.Type</th>
                                <th>Month</th><th>Year</th><th>Electricity</th>
-                               <th>Water</th><th>Garbage</th>
+                               <th>Water</th><th>Garbage</th><th>Surcharge</th>
                                <th>OR.No.</th><th>OR.Date</th>
 
                            </tr>
@@ -147,6 +148,7 @@
                                            "<td><input type='text' size='7' name='water_amount_paid' id='water_amount_paid' value='".$result['water_amount_paid']."' disabled /></td>".
                                            //"<td>".$result['garbage_fee']."</td>".
                                            "<td><input type='text' size='5' name='garbage_amount_paid' id='garbage_amount_paid' value='".$result['garbage_amount_paid']."' disabled /></td>".
+                                            "<td><input type='text' size='5' name='surcharge' id='surcharge' value='".$result['surcharge']."' disabled /></td>".
                                            "<td><input type='text' size='7' name='receipt_no' id='receipt_no' value='".$result['receipt_number']."' disabled /></td>".
                                   
                                            "<td><input type='date' size='5' name='receipt_date' id='receipt_date' value='".$result['receipt_date']."' disabled /><input type='hidden' name='bill_id' id='bill_id' value=' ".$result['id']." ' /></td>".

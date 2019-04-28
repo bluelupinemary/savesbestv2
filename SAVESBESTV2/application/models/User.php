@@ -582,7 +582,7 @@
 
  		function get_collections_for_edit_by_account($account_no, $month, $year){
 	
-			$query = $this->db->query("select a.id,b.fullname as fullname,b.address,b.consumer_type,b.account_no, c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, month(receipt_date) as payment_month, year(receipt_date) as payment_year, c.surcharge,c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where b.account_no=".$account_no." and month(receipt_date)=".$month." and year(receipt_date)=".$year);
+			$query = $this->db->query("select a.id,b.fullname as fullname,b.address,b.consumer_type,b.account_no, c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, a.bill_month, month(c.receipt_date) as payment_month, a.bill_year, year(c.receipt_date) as payment_year, c.surcharge,c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where b.account_no=".$account_no." and month(receipt_date)=".$month." and year(receipt_date)=".$year);
 
 			return $query->result_array();
 
@@ -591,7 +591,7 @@
 
  		function get_collections_for_view($month, $year){
 	
-			$query = $this->db->query("select a.*,b.fullname as fullname,b.address,b.consumer_type,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where month(c.receipt_date)=".$month." and year(c.receipt_date)=".$year);
+			$query = $this->db->query("select a.*,b.fullname as fullname,b.address,b.consumer_type,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, c.receipt_number, c.receipt_date,c.surcharge from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where month(c.receipt_date)=".$month." and year(c.receipt_date)=".$year);
 
 			return $query->result_array();
 

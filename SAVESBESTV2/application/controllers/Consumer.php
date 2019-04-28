@@ -821,7 +821,9 @@ function showImportedBillings(){
                         //echo "<br><br><br><br><br><br><br> >>>>>.".$month.">>>".$year;
                         
                         $results = $this->user->get_yearly_collections_for_report_view($year,$account_no);
-                        
+                        if($results!=null){
+                               
+                            
 
 
                             $pdf=new PDF_MC_Table();
@@ -832,21 +834,22 @@ function showImportedBillings(){
 
                              $pdf->Image('/var/www/html/SAVESBESTV2/devtools/images/bill/uplb.png',10,10,20,18);
                             
-                            $pdf->Image('/var/www/html/SAVESBESTV2/devtools/images/bill/logo-trans.png',35,10,-300);
+                            //$pdf->Image('/var/www/html/SAVESBESTV2/devtools/images/bill/logo-trans.png',35,10,-300);
                             //filler; add new line
                             $pdf->Cell(40,5,'',0,1,'L');
                              
                              //SAVESBEST HEADER
-                            $pdf->Cell(50,5,'',0,0,'L');
+                            $pdf->Cell(30,5,'',0,0,'L');
                             $pdf->SetTextColor(13, 103, 133);
                             $pdf->SetFont('Arial','B',14);
+                            $pdf->Cell(70,5,'RGDO-OVCPD Utilities Billing Section',0,1,'L');
+                            //$pdf->Cell(40,5,'',0,1,'L');
+                            $pdf->Cell(30,5,'',0,0,'L');
                             $pdf->Cell(70,5,'Statement of Account',0,1,'L');
 
                             $pdf->SetTextColor(0,0,0);
                             $pdf->SetFont('Arial','',12);
-                             //filler; add new line
-                            $pdf->Cell(0,5,'',0,1,'L');
-                            $pdf->Cell(0,5,'',0,1,'L');
+
                              //filler; add new line
                             $pdf->Cell(0,5,'',0,1,'L');
                             //add the consumer's name on the first line
@@ -951,7 +954,11 @@ function showImportedBillings(){
                             $pdf->Cell(100,5,'',0,0,'L');
                             $pdf->Cell(100,5,'Head, Utility Billing Section',0,0,'L');
                             $pdf->Output('D',$results[0]['fullname']." ".$year."_SAO.pdf");
-
+                    }//results array has elements
+                    else{
+                        echo "<br><br><h3><span style='color:maroon;'>REPORT CANNOT BE GENERATED. NO RESULTS FOUND FOR THIS CONSUMER.<br><br>Click 
+                        <a href=".site_url('home/viewStatementOfAccount').">here</a> to go back to the SOA report generation page. </span></h3>";
+                    }
                 }else{
                         redirect('login','refresh');
                 }

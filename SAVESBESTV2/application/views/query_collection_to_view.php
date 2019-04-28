@@ -32,6 +32,7 @@
 
 
     <div style="margin-left:5%;">
+      <h4 style="color:darkgreen;"><b>Edit Consumer Payment / Add Surcharge Page</b></h4>
       <p>This page will allow you to EDIT a consumers' collection/payment entry given the ACCOUNT NO. and PAYMENT month and year.</p>
       <h4>Please enter the details to be edited: </h4>
     </div>
@@ -89,7 +90,7 @@
                            <tr>
                               
                                <th>Bill<br>ID</th><th>Name</th><th>Address</th><th>Con.Type</th>
-                               <th>Month</th><th>Year</th><th>Electricity<br>Amt. Paid</th>
+                               <th>Bill<br>Month</th><th>Bill<br>Year</th><th>Electricity<br>Amt. Paid</th>
                                <th>Water<br>Amt. Paid</th><th>Garbage<br>Amt. Paid</th>
                                 <th>Surcharge</th><th>OR.No.</th><th>OR.Date</th>
 
@@ -101,29 +102,29 @@
                                $c = count($results);
                               // echo "ITOOOOO".$c;
                                foreach($results as $result){
-                                  if($result['payment_month']==1){
+                                  if($result['bill_month']==1){
                                       $month="Jan";
-                                  }else if($result['payment_month']==2){
+                                  }else if($result['bill_month']==2){
                                       $month="Feb";
-                                  }else if($result['payment_month']==3){
+                                  }else if($result['bill_month']==3){
                                       $month="Mar";
-                                  }else if($result['payment_month']==4){
+                                  }else if($result['bill_month']==4){
                                       $month="Apr";
-                                  }else if($result['payment_month']==5){
+                                  }else if($result['bill_month']==5){
                                       $month="May";
-                                  }else if($result['payment_month']==6){
+                                  }else if($result['bill_month']==6){
                                       $month="Jun";
-                                  }else if($result['payment_month']==7){
+                                  }else if($result['bill_month']==7){
                                       $month="Jul";
-                                  }else if($result['payment_month']==8){
+                                  }else if($result['bill_month']==8){
                                       $month="Aug";
-                                  }else if($result['payment_month']==9){
+                                  }else if($result['bill_month']==9){
                                       $month="Sep";
-                                  }else if($result['payment_month']==10){
+                                  }else if($result['bill_month']==10){
                                       $month="Oct";
-                                  }else if($result['payment_month']==11){
+                                  }else if($result['bill_month']==11){
                                       $month="Nov";
-                                  }else if($result['payment_month']==12){
+                                  }else if($result['bill_month']==12){
                                       $month="Dec";
                                   }
 
@@ -137,7 +138,7 @@
                                            "<td>".$result['address']."</td>".
                                            "<td>".$result['consumer_type']."</td>".
                                            "<td>".$month."</td>".
-                                           "<td>".$result['payment_year']."</td>".
+                                           "<td>".$result['bill_year']."</td>".
                                            //"<td>".$result['electricity_reading']."</td>".
                                            "<td><input type='text' size='7' name='electricity_amount_paid' id='electricity_amount_paid' value='".$result['electricity_amount_paid']."'></td>".
                                            //"<td><input type='text' size='5' name='electricity_amount_paid[".$result['id']."]' id='electricity_amount_paid'></td>".
