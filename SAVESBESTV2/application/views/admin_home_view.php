@@ -42,7 +42,7 @@
               <br/>
               Notifications:
               <?php  
-              echo "<br><span style='color:maroon;font-size:1.1em;'>BILLS NOT IN COLLECTION: </span>"."<a href='".site_url('home/viewBillingsForCollection')."' style='font-weight:bold;'>".$bills_not_paid_count['cnt']."</a>";
+              echo "<br><span style='color:maroon;font-size:1.1em;'>BILLS NOT IN COLLECTION: </span>"."<a href='".site_url('home/queryBillsToView')."' style='font-weight:bold;'>".$bills_not_paid_count['cnt']."</a>";
               echo "<br><span style='color:maroon;font-size:1.1em;'>WITH PARTIAL PAYMENTS: </span>"."<a href='".site_url('home/viewCollectionNotPaid')."' style='font-weight:bold;'>".$payment_not_full['cnt']."</a>";
       
 
@@ -83,24 +83,24 @@
     								      <span class="text-content"><span>EDIT CONSUMER DETAILS</span></span>
     								    </a>
     								</li>
-                    <li>
-                        <!--a href="<?php echo site_url('home/editConsumer') ?>"-->
+                    <!--li>
+                        <a href="<?php echo site_url('home/editConsumer') ?>">
                           <img src="<?php echo base_url();?>devtools/images/coleasee.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>ADD A COLEASEE</span></span>
                         </a>
                     </li>
                      <li>
-                        <!--a href="<?php echo site_url('home/editConsumer') ?>"-->
+                        <a href="<?php echo site_url('home/editConsumer') ?>">
                           <img src="<?php echo base_url();?>devtools/images/inactive_consumers.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>VIEW INACTIVE CONSUMERS</span></span>
                         </a>
                     </li>
                     <li>
-                        <!--a href="<?php echo site_url('home/editConsumer') ?>"-->
+                        <a href="<?php echo site_url('home/editConsumer') ?>">
                           <img src="<?php echo base_url();?>devtools/images/archive.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>VIEW ARCHIVED CONSUMERS</span></span>
                         </a>
-                    </li>
+                    </li-->
     							</ul>
 
     							<!--	<p> <a class="btn btn-primary btn-lg col" name="register" role="button" href="<?php echo site_url('home/addTeacher') ?>">Add Teacher</a></p>-->
@@ -130,9 +130,16 @@
                         </a>
                     </li-->
                      <li>
-                        <a href="<?php echo site_url('home/viewImportedConsumersBills') ?>">
+                        <!--a href="<?php echo site_url('home/viewImportedConsumersBills') ?>"-->
+                         <a href="<?php echo site_url('home/queryImportedConsumersBillsByMonthYear') ?>">
                           <img src="<?php echo base_url();?>devtools/images/readings.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>VIEW BILLINGS</span></span>
+                        </a>
+                    </li>
+                     <li>
+                         <a href="<?php echo site_url('home/viewConsumersForYearBalance') ?>">
+                          <img src="<?php echo base_url();?>devtools/images/add_year_balance_icon.png" width="100px" height="100px" alt="image goes here"></img>
+                          <span class="text-content"><span>ADD YEAR BALANCE</span></span>
                         </a>
                     </li>
                   </ul>
@@ -171,7 +178,8 @@
                         </a>
                     </li>
                      <li>
-                        <a href="<?php echo site_url('home/viewBillingsForCollection') ?>">
+                        <!--a href="<?php echo site_url('home/viewBillingsForCollection') ?>"-->
+                        <a href="<?php echo site_url('home/queryBillsToView') ?>">
                           <img src="<?php echo base_url();?>devtools/images/addCollection.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>ADD COLLECTION</span></span>
                         </a>
@@ -211,24 +219,24 @@
                           <span class="text-content"><span>VIEW STATEMENT OF ACCOUNT</span></span>
                         </a>
                     </li>
-                    <li>
-                        <!--a href="<?php echo site_url('home/editConsumer') ?>"-->
+                    <!--li>
+                        <a href="<?php echo site_url('home/editConsumer') ?>">
                           <img src="<?php echo base_url();?>devtools/images/reports.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>VIEW REPORTS</span></span>
                         </a>
                     </li>
                      <li>
-                        <!--a href="<?php echo site_url('home/editConsumer') ?>"-->
+                        <a href="<?php echo site_url('home/editConsumer') ?>">
                           <img src="<?php echo base_url();?>devtools/images/bill_summary.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>VIEW BILL SUMMARY</span></span>
                         </a>
                     </li>
                    <li>
-                        <!--a href="<?php echo site_url('home/queryCollectionReport') ?>"-->
+                        <!--a href="<?php echo site_url('home/queryCollectionReport') ?>">
                           <img src="<?php echo base_url();?>devtools/images/collection_summary.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>VIEW COLLECTION REPORT</span></span>
                         </a>
-                    </li>
+                    </li--  >
                   </ul>
 
                   <!--  <p> <a class="btn btn-primary btn-lg col" name="register" role="button" href="<?php echo site_url('home/addTeacher') ?>">Add Teacher</a></p>-->

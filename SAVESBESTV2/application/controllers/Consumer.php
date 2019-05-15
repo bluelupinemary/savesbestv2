@@ -211,7 +211,27 @@ function addBondDeposit(){
      }else{
          redirect('login','refresh');
      }
- }//end of function    
+ }//end of function  
+
+ function addYearBalance(){
+     if($this->session->userdata('logged_in')){
+         $session_data = $this->session->userdata('logged_in');
+         $data['username'] = $session_data['username'];
+         $data['userid'] = $session_data['userid'];
+         $data['usertype'] = $session_data['usertype'];
+     
+         $consumer_id_to_add_bal = $this->input->post('consumer_id');
+
+         $resultdata['results'] = $this->user->get_consumer_profile($consumer_id_to_add_bal);
+         $resultdata['username']=$data['username'];
+         $resultdata['consumer_id']=$consumer_id_to_add_bal;
+
+         $this->load->view('template/header_template_view');
+         $this->load->view('add_year_balance_to_a_consumer_view',$resultdata);
+     }else{
+         redirect('login','refresh');
+     }
+ }//end of function  
 
 //function to add "next reading" details to a consumer
 function addReading(){
@@ -272,6 +292,37 @@ function insertBondDeposit(){
                 $this->load->view('template/header_template_view');
                 $this->load->view('success_update_consumer_view',$message);
                 $this->load->view('template/footer_template_view');
+    }else{
+                redirect('login','refresh');
+    }
+ }
+
+ function insertYearBalanceToConsumer(){
+    if($this->session->userdata('logged_in')){
+        $session_data = $this->session->userdata('logged_in');
+                $data['username'] = $session_data['username'];
+                $data['userid'] = $session_data['userid'];
+                $data['usertype'] = $session_data['usertype']; 
+
+                $consumer_id = $this->input->post('consumer_id');
+                $account_no = $this->input->post('account_no');
+                $amount = $this->input->post('balance_amount');
+                $year = $this->input->post('balance_year');
+                $val =  $this->user->add_year_balance_to_consumer($consumer_id, $amount,$year);
+                
+               // echo "<br><br> ".$amount." ".$year." c- ".$consumer_id." a- ".$account_no;
+                $resultdata['username'] = $data['username'];
+                
+                if($val){
+                     $resultdata['ok'] = true;
+                }else{
+                    $resultdata['ok'] = false;
+                }
+                $resultdata['results'] = $this->user->get_consumers();
+                //$message['msg']=1;
+                $this->load->view('template/header_template_view');
+                $this->load->view('add_year_balance_view',$resultdata);
+               // $this->load->view('template/footer_template_view');
     }else{
                 redirect('login','refresh');
     }
@@ -449,34 +500,51 @@ function showImportedBillings(){
                 $data['username'] = $session_data['username'];
                 $data['userid'] = $session_data['userid'];
                 $data['usertype'] = $session_data['usertype']; 
-
+                $username = $data['username'];
                 $resultdata['username'] = $data['username'];
 
                  $consumers = $this->input->post('consumers',TRUE);
                  $electricity = $this->input->post('electricity_amount_paid');
                  $water = $this->input->post('water_amount_paid');
                  $garbage = $this->input->post('garbage_amount_paid');
-                 $receiptNo = $this->input->post('receipt_no');
-                 $receiptDate = $this->input->post('receipt_date');
+               
+                 $e_receiptNo = $this->input->post('elec_receipt_no');
+                 $e_receiptDate = $this->input->post('elec_receipt_date');
+
+                 $w_receiptNo = $this->input->post('water_receipt_no');
+                 $w_receiptDate = $this->input->post('water_receipt_date');
+
+                 $g_receiptNo = $this->input->post('garbage_receipt_no');
+                 $g_receiptDate = $this->input->post('garbage_receipt_date');
                //print_r($ea);
                 //$num_consumers = count($consumers);
                 $date = date('Y-m-d');
                 //echo "<br>Count:".$num_consumers."<br>"; 
                 $resultdata['ok'] = false;   
+                $resultdata['added_to_db'] = false;
                 for($i=0;$i<count($consumers);$i++){
                     $id = (int)$consumers[$i];
-                    // echo " id: ".$id."| E: ".$electricity[$id]."| W: ".$water[$id]."| G: ".$garbage[$id].
-                    // "| R: ".$receiptNo[$id]."| D: ".$receiptDate[$id].
+                     //echo "<br><br><br>id: ".$id."| E: ".$electricity[$id]."| W: ".$water[$id]."| G: ".$garbage[$id].
+                     //"| R: ".$e_receiptNo[$id]."| D: ".$e_receiptDate[$id].
                     // "<br>";
-                     $this->user->add_payment_to_consumer_collection($id,$electricity[$id],$water[$id],$garbage[$id],$receiptNo[$id],$receiptDate[$id],$date);
+                    // $this->user->add_payment_to_consumer_collection($id,$electricity[$id],$water[$id],$garbage[$id],$receiptNo[$id],$receiptDate[$id],$date);
+                    $this->user->add_payment_to_consumer_collection($id,$electricity[$id],$water[$id],$garbage[$id],$e_receiptNo[$id],$e_receiptDate[$id],$w_receiptNo[$id],$w_receiptDate[$id],$g_receiptNo[$id],$g_receiptDate[$id], $date, $username);
+
 
                     $resultdata['ok'] = true;
+                    $resultdata['added_to_db'] = true;
                 }
-                $resultdata['results'] = $this->user->get_consumer_billings_for_collection();
+                //$resultdata['results'] = $this->user->get_consumer_billings_for_collection();
+        
+                $month=0;
+                $year=0;
+                $resultdata['results'] = $this->user->get_consumer_billings_by_month_year($month,$year);
 
 
                 $this->load->view('template/header_template_view');
-               $this->load->view('list_bills_for_collection_view',$resultdata);
+             //  $this->load->view('list_bills_for_collection_view',$resultdata);
+                $this->load->view('query_bills_to_view',$resultdata);
+
 
 
 
@@ -509,17 +577,32 @@ function showImportedBillings(){
                 $resultdata['payment_month'] = $month;
                 $resultdata['payment_year'] = $year;
                 $resultdata['account_no'] = $account_no;
-                $resultdata['results'] = $this->user->get_collections_for_edit_by_account($account_no,$month,$year);
+                //$resultdata['results']
+                $results = $this->user->get_collections_for_edit_by_account($account_no,$month,$year);
+                 $resultdata['results'] = $results;
+
+               // echo "<br><br>";
+                //print_r($results);
+                
+                $bill_id=0;
                 $count = count($resultdata['results']);
                // echo "<br><br>COUNT: ".$count;
                 if($count > 0){
                     $resultdata['ok'] = true;
+                     $bill_id = $results[0]['id'];
+
+                   
                 }else{
                     $resultdata['ok'] = false;
                 }
+
+
+                //$resultdata['receipt_results'] = $this->user->get_receipt_per_consumer_account($month, $year, $bill_id);
+                $resultdata['receipt_results'] = $this->user->get_receipt_per_consumer_account($bill_id);
                  
 
-              //  echo "ok ".$resultdata['ok'];
+             //   echo "<br><br>ok ".$bill_id;
+            //    print_r($resultdata['receipt_results']);
         //        $resultdata[''] = $this->user->get_sections_handled($data['userid']);
         //        $resultdata['username']=$data['username'];
 
@@ -593,8 +676,57 @@ function showImportedBillings(){
             $resultdata['consumer_id'] = $consumer_id;
             $resultdata['account_no'] = $temp_account_no;
             $resultdata['consumer_name'] = $consumer_name;
-            $resultdata['results'] = $this->user->get_consumer_statement_of_account($consumer_id,$year);
+         
+            $results = $this->user->get_consumer_statement_of_account($consumer_id,$year);
+
+            $resultdata['results'] = $results;
+            $bills_of_consumer = $this->user->get_consumer_bill_ids($consumer_id,$year);
+            //echo "<br><br>-";
+           // print_r($bills_of_consumer);
             $count = count($resultdata['results']);
+                //echo "<br><br>COUNT: ".$count;
+            $receipt_results = [];
+                if($count > 0){
+                    $resultdata['ok'] = true;
+                    foreach ($bills_of_consumer as $bill) {
+                        $temp = $this->user->get_receipt_per_consumer_account($bill['id']);
+                         array_push($receipt_results,$temp);
+                    }
+                   
+                
+                }else{
+                    $resultdata['ok'] = false;
+                }
+                 
+            //print_r($receipt_results);
+            $resultdata['receipt_results'] = $receipt_results;
+              //  echo "ok ".$resultdata['ok'];
+        //        $resultdata[''] = $this->user->get_sections_handled($data['userid']);
+        //        $resultdata['username']=$data['username'];
+
+                $this->load->view('template/header_template_view');
+                $this->load->view('consumer_statement_of_account_view',$resultdata);
+           }else{
+               redirect('login','refresh');
+           }
+    }
+
+     function findBillsByMonthYear(){
+        
+         if($this->session->userdata('logged_in')){
+             $session_data = $this->session->userdata('logged_in');
+             $data['username'] = $session_data['username'];
+             $data['userid'] = $session_data['userid'];
+             $data['usertype'] = $session_data['usertype'];
+                $temp_month = $this->input->post('month');
+                $temp_year = $this->input->post('year');
+                $month = intval($temp_month);
+                $year = intval($temp_year);
+
+                //echo "<br><br><br><br><br><br><br> >>>>>.".$month.">>>".$year;
+                $resultdata['username'] = $data['username'];
+                $resultdata['results'] = $this->user->get_consumer_billings_by_month_year($month,$year);
+                $count = count($resultdata['results']);
                 //echo "<br><br>COUNT: ".$count;
                 if($count > 0){
                     $resultdata['ok'] = true;
@@ -608,7 +740,42 @@ function showImportedBillings(){
         //        $resultdata['username']=$data['username'];
 
                 $this->load->view('template/header_template_view');
-                $this->load->view('consumer_statement_of_account_view',$resultdata);
+                $this->load->view('query_bills_to_view',$resultdata);
+           }else{
+               redirect('login','refresh');
+           }
+    }
+
+    function viewImportedBillsByMonthYear(){
+        
+         if($this->session->userdata('logged_in')){
+             $session_data = $this->session->userdata('logged_in');
+             $data['username'] = $session_data['username'];
+             $data['userid'] = $session_data['userid'];
+             $data['usertype'] = $session_data['usertype'];
+                $temp_month = $this->input->post('month');
+                $temp_year = $this->input->post('year');
+                $month = intval($temp_month);
+                $year = intval($temp_year);
+
+                //echo "<br><br><br><br><br><br><br> >>>>>.".$month.">>>".$year;
+                $resultdata['username'] = $data['username'];
+                $resultdata['results'] = $this->user->get_consumer_billings_by_month_year($month,$year);
+                $count = count($resultdata['results']);
+                //echo "<br><br>COUNT: ".$count;
+                if($count > 0){
+                    $resultdata['ok'] = true;
+                }else{
+                    $resultdata['ok'] = false;
+                }
+                 
+
+              //  echo "ok ".$resultdata['ok'];
+        //        $resultdata[''] = $this->user->get_sections_handled($data['userid']);
+        //        $resultdata['username']=$data['username'];
+
+                $this->load->view('template/header_template_view');
+                $this->load->view('query_imported_bills_view',$resultdata);
            }else{
                redirect('login','refresh');
            }
@@ -641,6 +808,9 @@ function showImportedBillings(){
               //  echo "ok ".$resultdata['ok'];
         //        $resultdata[''] = $this->user->get_sections_handled($data['userid']);
         //        $resultdata['username']=$data['username'];
+
+                $resultdata['receipt_results'] = $this->user->get_all_receipts_per_month_year($month,$year);
+
 
                 $this->load->view('template/header_template_view');
                 $this->load->view('query_all_collections_view',$resultdata);
@@ -711,10 +881,19 @@ function showImportedBillings(){
                      $water = $this->input->post('water_amount_paid');
                      $garbage = $this->input->post('garbage_amount_paid');
                      $surcharge = $this->input->post('surcharge');
-                     $receiptNo = $this->input->post('receipt_no');
-                     $receiptDate = $this->input->post('receipt_date');
+                    // $receiptNo = $this->input->post('receipt_no');
+                    // $receiptDate = $this->input->post('receipt_date');
                      $updated_by = $data['username'];
-                   //print_r($ea);
+                     $e_receiptNo = $this->input->post('elec_receipt_no');
+                     $e_receiptDate = $this->input->post('elec_receipt_date');
+
+                     $w_receiptNo = $this->input->post('water_receipt_no');
+                     $w_receiptDate = $this->input->post('water_receipt_date');
+
+                     $g_receiptNo = $this->input->post('garbage_receipt_no');
+                     $g_receiptDate = $this->input->post('garbage_receipt_date');
+                   
+
                    // $num_consumers = count($consumers);
                       //echo "<br><br>".$month." ".$year." ".$account_no;
                      // echo "<br>".$electricity;
@@ -723,7 +902,7 @@ function showImportedBillings(){
                      // echo "<br>".$receiptNo;
                      // echo "<br>".$receiptDate;
                     $date_updated = date('Y-m-d');         
-                   $this->user->update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$surcharge,$receiptNo,$receiptDate,$date_updated,$updated_by);
+                   $this->user->update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$surcharge,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_updated,$updated_by);
 
                    //$resultdata['results'] = $this->user->get_collections_for_edit($bill_id);
                   //$resultdata['results'] =  $resultdata['username'] = $data['username'];
@@ -737,10 +916,17 @@ function showImportedBillings(){
                 if($count > 0){
                     $resultdata['ok'] = true;
                       $resultdata['update_ok'] = true;
+
+                   
                 }else{
                     $resultdata['ok'] = false;
-                      $resultdata['update_ok'] = false;
+                     $resultdata['update_ok'] = false;
+                
                 }
+
+
+                $resultdata['receipt_results'] = $this->user->get_receipt_per_consumer_account($bill_id);
+
                  
                   
                    $resultdata['username'] = $data['username'];
@@ -766,8 +952,19 @@ function showImportedBillings(){
                  $electricity = $this->input->post('electricity_amount_paid');
                  $water = $this->input->post('water_amount_paid');
                  $garbage = $this->input->post('garbage_amount_paid');
-                 $receiptNo = $this->input->post('receipt_no');
-                 $receiptDate = $this->input->post('receipt_date');
+                 //$receiptNo = $this->input->post('receipt_no');
+                 //$receiptDate = $this->input->post('receipt_date');
+
+                  $e_receiptNo = $this->input->post('elec_receipt_no');
+                 $e_receiptDate = $this->input->post('elec_receipt_date');
+
+                 $w_receiptNo = $this->input->post('water_receipt_no');
+                 $w_receiptDate = $this->input->post('water_receipt_date');
+
+                 $g_receiptNo = $this->input->post('garbage_receipt_no');
+                 $g_receiptDate = $this->input->post('garbage_receipt_date');
+
+
                   //echo "<br><br>"; print_r($consumers);
                    // $num_consumers = count($consumers);
                      //echo "<br><br>".$bill_id;
@@ -787,12 +984,15 @@ function showImportedBillings(){
                     //echo "<br><br>ITOOOOOOOO";
                     $e = $electricity[$id];
                     //echo "<br><br>ELe:".$id;
-                    $this->user->update_partial_payment_of_consumer_in_collection($id,$electricity[$id],$water[$id],$garbage[$id],$receiptNo[$id],$receiptDate[$id],$date,$username);
+                   // $this->user->update_partial_payment_of_consumer_in_collection($id,$electricity[$id],$water[$id],$garbage[$id],$receiptNo[$id],$receiptDate[$id],$date,$username);
+
+                    $this->user->update_partial_payment_of_consumer_in_collection($id,$electricity[$id],$water[$id],$garbage[$id],$e_receiptNo[$id],$e_receiptDate[$id],$w_receiptNo[$id],$w_receiptDate[$id],$g_receiptNo[$id],$g_receiptDate[$id],$date,$username);
 
                     $resultdata['ok'] = true;
                 }
                // $resultdata['results'] = $this->user->get_collection_with_partial_payment();
                 $resultdata['results'] = $this->user->get_consumer_collection_not_paid();
+                $resultdata['receipt_results'] = $this->user->get_receipt_per_bill();
 
 
                 $this->load->view('template/header_template_view');
@@ -813,14 +1013,47 @@ function showImportedBillings(){
                       
                         $temp_year = $this->input->post('year');
                         $temp_account_no = $this->input->post('account_no');
+                        $temp_consumer_id = $this->input->post('consumer_id');
                         $resultdata['username']=$data['username'];
 
                         $account_no = intval($temp_account_no);
+                        $consumer_id = intval($temp_consumer_id);
                         $year = intval($temp_year);
 
-                        //echo "<br><br><br><br><br><br><br> >>>>>.".$month.">>>".$year;
+                        //echo "<br><br><br><br><br><br><br> >>>>>.".$consumer_id;
+
+                        $var = $this->user->get_consumer_statement_of_account($consumer_id,$year);
+
+                        $bills_of_consumer = $this->user->get_consumer_bill_ids($consumer_id,$year);
+
+                        $bal_of_consumer = $this->user->get_consumer_balance($consumer_id,$year-1);
+                        //echo "<br><br>-";
+                       // print_r($bills_of_consumer);
+                       // print_r($var);
+                        $count = count($var);
+                        $hasBalance = count($bal_of_consumer);
+                            //echo "<br><br>COUNT: ".$hasBalance." bal: ".$balance[0]['balance_amount'];
+                            //print_r($balance);
+                        $receipt_results = [];
+                        if($count > 0){
+                               // $resultdata['ok'] = true;
+                            foreach ($bills_of_consumer as $bill) {
+                                $temp = $this->user->get_receipt_per_consumer_account($bill['id']);
+                                array_push($receipt_results,$temp);
+                            }
+                        }
+                        $balance = 0;
+                        if($hasBalance > 0 ){
+                            $balance = $bal_of_consumer[0]['balance_amount'];
+                        }
+                             
+                        //print_r($receipt_results);
+                       // echo "<br><br>>>>>>";
                         
                         $results = $this->user->get_yearly_collections_for_report_view($year,$account_no);
+                        //print_r($results);
+                        //echo "<br><br>>>>>>";
+                        //print_r($var);
                         if($results!=null){
                                
                             
@@ -828,9 +1061,9 @@ function showImportedBillings(){
 
                             $pdf=new PDF_MC_Table();
                             $pdf->AddPage('L','A4',0);
-                            $pdf->SetFont('Arial','',12);
+                            $pdf->SetFont('Arial','',10);
                             //Table with 20 rows and 4 columns
-                            $pdf->SetWidths(array(30,30,30,30,30,30,30,20,20,30));
+                            $pdf->SetWidths(array(20,25,25,30,25,25,30,25,25,30,15));
 
                              $pdf->Image('/var/www/html/SAVESBESTV2/devtools/images/bill/uplb.png',10,10,20,18);
                             
@@ -869,65 +1102,68 @@ function showImportedBillings(){
                             //filler; add new line
                             $pdf->Cell(0,5,'',0,1,'L');
                             //table headers
-                            $pdf->Cell(30,10,'MONTH/PERIOD ',1,0,'C');
-                            $pdf->Cell(60,10,'ELECTRIC ',1,0,'C');
-                            $pdf->Cell(60,10,'WATER ',1,0,'C');
-                            $pdf->Cell(60,10,'GARBAGE ',1,0,'C');
-                            $pdf->Cell(70,10,'',1,0,'C');
+                            $pdf->Cell(20,10,'PERIOD ',1,0,'C');
+                            $pdf->Cell(80,10,'ELECTRIC ',1,0,'C');
+                            $pdf->Cell(80,10,'WATER ',1,0,'C');
+                            $pdf->Cell(80,10,'GARBAGE ',1,0,'C');
+                            $pdf->Cell(15,10,'',1,0,'C');
                             //filler; add new line
                             $pdf->Cell(0,10,'',0,1,'L');
 
-                            $pdf->Cell(30,10,''.$year,1,0,'C');
-                            $pdf->Cell(30,10,'ACTUAL COST ',1,0,'C');
-                            $pdf->Cell(30,10,'PAYMENT',1,0,'C');
-                            $pdf->Cell(30,10,'ACTUAL COST ',1,0,'C');
-                            $pdf->Cell(30,10,'PAYMENT',1,0,'C');
-                            $pdf->Cell(30,10,'ACTUAL COST ',1,0,'C');
-                            $pdf->Cell(30,10,'PAYMENT',1,0,'C');
-                            $pdf->Cell(20,10,'SURCH',1,0,'C');
-                            $pdf->Cell(20,10,'OR. NO.',1,0,'C');
-                            $pdf->Cell(30,10,'OR. DATE',1,0,'C');
+                            $pdf->Cell(20,10,''.$year,1,0,'C');
+                            $pdf->Cell(25,10,'ACTUAL ',1,0,'C');
+                            $pdf->Cell(25,10,'PAYMENT',1,0,'C');
+                            $pdf->Cell(30,10,'OR.NO',1,0,'C');
+                            $pdf->Cell(25,10,'ACTUAL ',1,0,'C');
+                            $pdf->Cell(25,10,'PAYMENT',1,0,'C');
+                            $pdf->Cell(30,10,'OR.NO',1,0,'C');
+                            $pdf->Cell(25,10,'ACTUAL ',1,0,'C');
+                            $pdf->Cell(25,10,'PAYMENT',1,0,'C');
+                            $pdf->Cell(30,10,'OR.NO',1,0,'C');
+                            $pdf->Cell(15,10,'SURCH',1,0,'C');
+                            //$pdf->Cell(20,10,'OR. NO.',1,0,'C');
+                            //$pdf->Cell(30,10,'OR. DATE',1,0,'C');
                            
                              //filler; add new line
                             $pdf->Cell(0,10,'',0,1,'L');
 
-                            $pdf->SetFont('Arial','',10);
+                            $pdf->SetFont('Arial','',9);
                             //for($i=0;$i<20;$i++)
                             //    $pdf->Row(array(GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence()));
                             //less than 12 (12 months)
                             for($i=0;$i<=16;$i++){
                                 if($i==0){
-                                    $pdf->Row(array("BALANCE  ".($year-1),"-","","","","","","","",""));
+                                    $pdf->Row(array("BAL  ".($year-1),$balance,"","","","","","","","",""));
                                 }if($i==1){
-                                    $pdf->Row(array("JANUARY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("JAN",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==2){
-                                    $pdf->Row(array("FEBRUARY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("FEB",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==3){
-                                    $pdf->Row(array("MARCH",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("MAR",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==4){
-                                    $pdf->Row(array("APRIL",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("APR",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==5){
-                                    $pdf->Row(array("MAY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("MAY",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==6){
-                                    $pdf->Row(array("JUNE",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("JUN",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==7){
-                                    $pdf->Row(array("JULY",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("JUL",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==8){
-                                    $pdf->Row(array("AUGUST",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("AUG",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==9){
-                                    $pdf->Row(array("SEPTEMBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("SEPT",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==10){
-                                    $pdf->Row(array("OCTOBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("OCT",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==11){
-                                    $pdf->Row(array("NOVEMBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("NOV",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==12){
-                                    $pdf->Row(array("DECEMBER",getElectricBill($i,$results),getElectricPaid($i,$results),getWaterBill($i,$results),getWaterPaid($i,$results),getGarbageBill($i,$results),getGarbagePaid($i,$results),getSurcharge($i,$results),getORNumber($i,$results),getORDate($i,$results)));
+                                    $pdf->Row(array("DEC",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==14){
-                                    $pdf->Row(array("TOTAL",getTotalElectricBill($results),getTotalElectricPaid($results),getTotalWaterBill($results),getTotalWaterPaid($results),getTotalGarbageBill($results),getTotalGarbagePaid($results),"","",""));
+                                    $pdf->Row(array("TOTAL",getTotalElectricBill($results),getTotalElectricPaid($results),"",getTotalWaterBill($results),getTotalWaterPaid($results),"",getTotalGarbageBill($results),getTotalGarbagePaid($results),"",""));
                                 }if($i==15){
-                                    $pdf->Row(array("BALANCE",getElectricBalance($results),"",getWaterBalance($results),"",getGarbageBalance($results),"","","",""));
+                                    $pdf->Row(array("BAL",getElectricBalance($results),"","",getWaterBalance($results),"","",getGarbageBalance($results),"","",""));
                                 }if($i==16){
-                                    $pdf->Row(array("BALANCE ".$year,getYearBalance($results),"","","","","","","",""));
+                                    $pdf->Row(array("BAL ".$year,getYearBalance($results),"","","","","","","","",""));
                                 }
                             }
 
@@ -1215,6 +1451,58 @@ function getORNumber($month,$results){
     }
     return "";
 }
+
+function getORNumber_util($month,$results,$receipts,$type){
+    for($i=0;$i<count($results);$i++){
+        $temp = intval($results[$i]['bill_month']);
+        if($temp==intval($month)){
+            //return $results[$i]['receipt_number'];
+            foreach($receipts[$i] as $receipt){
+                    if($receipt['bill_id']==$results[$i]['id'] && $receipt['utility_type']==$type){
+                        $newDate = date("m/d/y", strtotime($receipt['receipt_date']));
+                        return $receipt['receipt_no']." - ".$newDate;
+                        break;
+                    }
+            }
+        }
+    }
+    return "";
+}
+
+function getORNumber_water($month,$results,$receipts){
+    for($i=0;$i<count($results);$i++){
+        $temp = intval($results[$i]['bill_month']);
+        if($temp==intval($month)){
+            //return $results[$i]['receipt_number'];
+            foreach($receipts[$i] as $receipt){
+                    if($receipt['bill_id']==$results[$i]['id'] && $receipt['utility_type']==2){
+                        return $receipt['receipt_no'];
+                        break;
+                    }
+            }
+        }
+    }
+    return "";
+}
+
+function getORNumber_gbg($month,$results,$receipts){
+    for($i=0;$i<count($results);$i++){
+        $temp = intval($results[$i]['bill_month']);
+        if($temp==intval($month)){
+            //return $results[$i]['receipt_number'];
+            foreach($receipts[$i] as $receipt){
+                    if($receipt['bill_id']==$results[$i]['id'] && $receipt['utility_type']==3){
+                        return $receipt['receipt_no'];
+                        break;
+                    }
+            }
+        }
+    }
+    return "";
+}
+
+
+
 function getORDate($month,$results){
     for($i=0;$i<count($results);$i++){
         $temp = intval($results[$i]['bill_month']);

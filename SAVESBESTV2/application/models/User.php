@@ -405,6 +405,28 @@
   			$this->db->update('consumer');
   		}//end of function
 
+  		function add_year_balance_to_consumer($consumer_id,$amount,$year){
+  			$this->db->select('count(*) as cnt');
+			$this->db->from('consumer_balance');
+			$this->db->where('consumer_id',$consumer_id);
+			$this->db->where('year_of_balance',$year);
+			$query = $this->db->get();
+			$result = $query->result_array();
+			if($result[0]['cnt'] == 0){
+				$data=array(
+	    		'consumer_id'=>$consumer_id,
+				'balance_amount'=>$amount,
+				'year_of_balance'=>$year
+				);
+ 
+				//insert the data as new row in the database
+  				$this->db->insert('consumer_balance',$data);
+				return true;			
+			}
+			else{return false;}
+  			
+  		}//end of function
+
 
 		//function to archive consumer
  		function delete_reading($reading_id){
@@ -499,6 +521,27 @@
 
  		} //end of get consumers
 
+ 		function get_consumer_balance($consumer_id,$year){
+			$query = $this->db->query("select balance_amount from consumer_balance where consumer_id=".$consumer_id." and year_of_balance =".$year);
+			return $query->result_array();
+
+
+ 		} //end of get consumers
+
+ 		function get_consumer_billings_by_month_year($month, $year){
+
+			// $this->db->select('consumer_reading.*');
+			// $this->db->from('consumer_reading');
+			// $this->db->where_not_in('consumer_reading.id',$consumer_id);
+			// //$this->db->limit(1);
+
+			// $query = $this->db->get();
+			$query = $this->db->query("select a.*,b.fullname as fullname,b.address,b.consumer_type from consumer_bill a join consumer b on a.consumer_id=b.id where a.id not in (select bill_id from consumer_collection) and a.bill_month=".$month." and a.bill_year=".$year);
+			return $query->result_array();
+
+
+ 		} //end of get consumers
+
  		function get_consumer_billings_for_collection(){
 
 			// $this->db->select('consumer_reading.*');
@@ -514,16 +557,51 @@
  		} //end of get consumers
 
  		function get_consumer_collection_not_paid(){
-			$query = $this->db->query("select a.*,b.fullname as fullname,b.address,b.consumer_type,(a.electricity_reading - c.electricity_amount_paid) as electricity_balance, (a.water_reading - c.water_amount_paid) as water_balance, (a.garbage_fee - c.garbage_amount_paid) as garbage_balance, c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where a.is_paid=0 or a.is_paid is null");
+			$query = $this->db->query("select a.*,b.fullname as fullname,b.address,b.consumer_type,(a.electricity_reading - c.electricity_amount_paid) as electricity_balance, (a.water_reading - c.water_amount_paid) as water_balance, (a.garbage_fee - c.garbage_amount_paid) as garbage_balance from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where a.is_paid=0 or a.is_paid is null");
 			
 			
+			return $query->result_array();
+
+
+ 		} //end of get consumers
+
+		function get_id_consumer_collection_not_paid(){
+			$query = $this->db->query("select a.id from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where a.is_paid=0 or a.is_paid is null");
+
+			return $query->result_array();
+
+
+ 		} //end of get consumers
+
+ 		function get_all_receipts_per_month_year($bill_month,$bill_year){
+			$query = $this->db->query("select a.id, b.bill_id, b.utility_type, b.receipt_no, b.receipt_date from consumer_bill a right join receipt b on a.id=b.bill_id where a.bill_month=".$bill_month." and a.bill_year=".$bill_year);
+
+
+			return $query->result_array();
+
+
+ 		} //end of get consumers
+
+ 		function get_receipt_per_bill(){
+			$query = $this->db->query("select a.id, b.bill_id, b.utility_type, b.receipt_no, b.receipt_date from consumer_bill a right join receipt b on a.id=b.bill_id where a.is_paid=0 or a.is_paid is null");
+
+
+			return $query->result_array();
+
+
+ 		} //end of get consumers
+
+ 		function get_receipt_per_consumer_account($bill_id){
+			$query = $this->db->query("select bill_id, utility_type, receipt_no, receipt_date from receipt where bill_id=".$bill_id);
+
+
 			return $query->result_array();
 
 
  		} //end of get consumers
 
  		function get_consumer_statement_of_account($consumer_id,$year){
-			$query = $this->db->query("select a.consumer_id,a.electricity_reading, a.water_reading, a.garbage_fee, a.bill_month,month(b.receipt_date) as payment_month,b.* from consumer_bill a join consumer_collection b on a.id=b.bill_id where a.bill_year=".$year." and a.consumer_id=".$consumer_id." order by a.bill_month");
+			$query = $this->db->query("select a.consumer_id,a.electricity_reading, a.water_reading, a.garbage_fee, a.bill_month, a.id as bill_id, b.* from consumer_bill a join consumer_collection b on a.id=b.bill_id where a.bill_year=".$year." and a.consumer_id=".$consumer_id." order by a.bill_month");
 			
 			
 			return $query->result_array();
@@ -531,7 +609,93 @@
 
  		} //end of get consumers
 
+ 		function get_consumer_bill_ids($consumer_id,$year){
+			$query = $this->db->query("select id from consumer_bill where is_paid=1 and bill_year=".$year." and consumer_id=".$consumer_id);
+			
+			
+			return $query->result_array();
 
+
+ 		} //end of get consumers
+
+ 		function add_payment_to_consumer_collection($bill_id,$electricity,$water,$garbage,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_added,$username){
+  				$data=array(
+		    		'bill_id'=>$bill_id,
+		    		'electricity_amount_paid'=>$electricity,
+		    		'water_amount_paid'=>$water,
+		    		'garbage_amount_paid'=>$garbage,
+		    		//'receipt_number'=>$receiptNo,
+		    		//'receipt_date'=>$receiptDate,
+		    		'date_added'=>$date_added
+					);
+
+	  			$this->db->insert('consumer_collection',$data);
+
+	  			$query = $this->db->query("select electricity_reading from consumer_bill where id=".$bill_id);
+	  			$temp_elec = $query->result_array();
+	  			$query = $this->db->query("select water_reading from consumer_bill where id=".$bill_id);
+	  			$temp_water = $query->result_array();
+	  			$query = $this->db->query("select garbage_fee from consumer_bill where id=".$bill_id);
+	  			$temp_garbage = $query->result_array();
+	  			//print_r($temp_garbage);
+	  			$bill_garbage_amount = $temp_garbage[0]['garbage_fee'];
+	  			$bill_elec_amount = $temp_elec[0]['electricity_reading'];
+	  			$bill_water_amount = $temp_water[0]['water_reading'];
+	  		 	//echo "<br><br>BILL E:".$bill_elec_amount." W: ".$bill_water_amount." G: ".$
+	  		 	//echo $bill_garbage_amount;
+
+	  		 	if($e_receiptDate!=NULL || $e_receiptDate!=""){
+	  		 		//echo "<br><br><br>R: ".$e_receiptDate;
+					$data2=array(
+		    		'bill_id'=>$bill_id,
+		    		'utility_type'=>1,
+		    		'receipt_no'=>$e_receiptNo,
+		    		'receipt_date'=>$e_receiptDate,
+		    		'date_added'=>$date_added,
+		    		'added_by'=>$username
+					);
+					$this->db->insert('receipt',$data2);
+  				}
+  				
+
+  				if($w_receiptDate!=NULL || $w_receiptDate!=""){
+					$data3=array(
+		    		'bill_id'=>$bill_id,
+		    		'utility_type'=>2,
+		    		'receipt_no'=>$w_receiptNo,
+		    		'receipt_date'=>$w_receiptDate,
+		    		'date_added'=>$date_added,
+		    		'added_by'=>$username
+					);
+					$this->db->insert('receipt',$data3);
+  				}
+  				
+  				if($g_receiptDate!=NULL || $g_receiptDate!=""){
+					$data4=array(
+		    		'bill_id'=>$bill_id,
+		    		'utility_type'=>3,
+		    		'receipt_no'=>$g_receiptNo,
+		    		'receipt_date'=>$g_receiptDate,
+		    		'date_added'=>$date_added,
+		    		'added_by'=>$username
+					);
+					$this->db->insert('receipt',$data4);
+  				}
+
+	  		 	if($bill_elec_amount==$electricity && $bill_water_amount==$water && $bill_garbage_amount==$garbage){
+	  				$data=array(
+	    				'is_paid'=>1
+					);
+		  			$this->db->where('id',$bill_id);
+		  			$this->db->update('consumer_bill',$data);
+	  			}
+
+
+	  	// 		
+  			
+  		}//end of function
+
+ 		/* OLD VERSION
  		function add_payment_to_consumer_collection($bill_id,$electricity,$water,$garbage,$receiptNo,$receiptDate,$date_added){
   				$data=array(
 		    		'bill_id'=>$bill_id,
@@ -569,7 +733,7 @@
 
 	  	// 		
   			
-  		}//end of function
+  		}//end of function*/
 
   		function get_collections_for_edit($billID){
 	
@@ -582,7 +746,7 @@
 
  		function get_collections_for_edit_by_account($account_no, $month, $year){
 	
-			$query = $this->db->query("select a.id,b.fullname as fullname,b.address,b.consumer_type,b.account_no, c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, a.bill_month, month(c.receipt_date) as payment_month, a.bill_year, year(c.receipt_date) as payment_year, c.surcharge,c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where b.account_no=".$account_no." and month(receipt_date)=".$month." and year(receipt_date)=".$year);
+			$query = $this->db->query("select a.id,b.fullname as fullname,b.address,b.consumer_type,b.account_no, c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, a.bill_month, month(c.receipt_date) as payment_month, a.bill_year, year(c.receipt_date) as payment_year, c.surcharge,c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where b.account_no=".$account_no." and a.bill_month=".$month." and a.bill_year=".$year);
 
 			return $query->result_array();
 
@@ -591,7 +755,7 @@
 
  		function get_collections_for_view($month, $year){
 	
-			$query = $this->db->query("select a.*,b.fullname as fullname,b.address,b.consumer_type,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, c.receipt_number, c.receipt_date,c.surcharge from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where month(c.receipt_date)=".$month." and year(c.receipt_date)=".$year);
+			$query = $this->db->query("select a.*,b.fullname as fullname,b.address,b.consumer_type,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, c.receipt_number, c.receipt_date,c.surcharge from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where a.bill_month=".$month." and a.bill_year=".$year);
 
 			return $query->result_array();
 
@@ -617,9 +781,10 @@
   			
   		}//end of function
 
-  		function update_partial_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$receiptNo,$receiptDate,$date_updated,$updated_by){
 
-
+  		function update_partial_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_updated,$updated_by){
+//UPDATE `consumer_bill` SET `is_paid`=0;
+  		//	echo "<br><br><br>".$e_receiptNo."| ".$e_receiptDate."|".$w_receiptNo."| ".$w_receiptDate."| ".$g_receiptNo."| ".$g_receiptDate;
   			$query = $this->db->query("select electricity_amount_paid, water_amount_paid,garbage_amount_paid from consumer_collection where bill_id=".$bill_id);
   			$temp = $query->result_array();
 	  		// 	//print_r($temp_garbage);
@@ -645,13 +810,113 @@
 		    		'electricity_amount_paid'=>$temp_elec,
 		    		'water_amount_paid'=>$temp_water,
 		    		'garbage_amount_paid'=>$temp_garbage,
-		    		'receipt_number'=>$receiptNo,
-		    		'receipt_date'=>$receiptDate,
 		    		'date_updated'=>$date_updated,
 		    		'updated_by' =>$updated_by
 					);
   				$this->db->where('bill_id',$bill_id);
 	  			$this->db->update('consumer_collection',$data);
+
+
+	  		$query = $this->db->query("select utility_type, receipt_date from receipt where bill_id=".$bill_id);
+	  		$temp2 = $query->result_array();
+	  		//echo "<br><br>";
+	  		//print_r($temp2);
+	  		$has_elec_receipt = false;
+	  		$has_water_receipt = false;
+	  		$has_garbage_receipt = false;
+
+	  		foreach ($temp2 as $result) {
+	  			if($result['utility_type']==1){
+	  				$has_elec_receipt = true;
+	  			}
+	  			else if($result['utility_type']==2){
+	  				$has_water_receipt = true;
+	  			}else if($result['utility_type']==3){
+	  				$has_garbage_receipt=true;
+	  			}
+	  		}
+
+	  			//UPDATE IF TO BE EDITED; INSERT ALL TO TABLE IF ADDED TO COLLECTION
+	  			if($e_receiptDate!=NULL || $e_receiptDate!=""){
+					if($has_elec_receipt == true){
+						//echo "<br><br><br>R: ".$e_receiptDate;
+						$data2=array(
+				    		'receipt_no'=>$e_receiptNo,
+				    		'receipt_date'=>$e_receiptDate,
+				    		'date_updated'=>$date_updated,
+				    		'added_by' =>$updated_by
+						);
+						$this->db->where('utility_type',1);
+						$this->db->where('bill_id',$bill_id);
+	  					$this->db->update('receipt',$data2);
+					}else{
+						$data2=array(
+				    		'bill_id'=>$bill_id,
+				    		'utility_type'=>1,
+				    		'receipt_no'=>$e_receiptNo,
+				    		'receipt_date'=>$e_receiptDate,
+				    		'date_added'=>$date_updated,
+				    		'added_by' =>$updated_by
+						);
+						$this->db->insert('receipt',$data2);
+					}
+				
+  				}
+  				
+
+  				if($w_receiptDate!=NULL || $w_receiptDate!=""){
+  					//echo "herreeeee";
+  					if($has_water_receipt == true){
+						//echo "<br><br><br>R: ".$e_receiptDate;
+						$data3=array(
+				    		'receipt_no'=>$w_receiptNo,
+				    		'receipt_date'=>$w_receiptDate,
+				    		'date_updated'=>$date_updated,
+				    		'added_by' =>$updated_by
+						);
+						$this->db->where('utility_type',2);
+						$this->db->where('bill_id',$bill_id);
+	  					$this->db->update('receipt',$data3);
+					}else{
+						$data3=array(
+			    		'bill_id'=>$bill_id,
+			    		'utility_type'=>2,
+			    		'receipt_no'=>$w_receiptNo,
+			    		'receipt_date'=>$w_receiptDate,
+			    		'date_updated'=>$date_updated,
+			    		'added_by' =>$updated_by
+						);
+						$this->db->insert('receipt',$data3);
+					}
+					
+  				}
+  				
+  				if($g_receiptDate!=NULL || $g_receiptDate!=""){
+  					if($has_garbage_receipt == true){
+						//echo "<br><br><br>R: ".$e_receiptDate;
+						$data4=array(
+				    		'receipt_no'=>$g_receiptNo,
+				    		'receipt_date'=>$g_receiptDate,
+				    		'date_updated'=>$date_updated,
+				    		'added_by' =>$updated_by
+						);
+						$this->db->where('utility_type',3);
+						$this->db->where('bill_id',$bill_id);
+	  					$this->db->update('receipt',$data4);
+					}else{
+			    		$data4=array(
+			    		'bill_id'=>$bill_id,
+			    		'utility_type'=>3,
+			    		'receipt_no'=>$g_receiptNo,
+			    		'receipt_date'=>$g_receiptDate,
+			    		'date_updated'=>$date_updated,
+			    		'added_by' =>$updated_by
+						);
+						$this->db->insert('receipt',$data4);
+					}
+					
+  				}
+
 
 
 	  			if($bill_elec==$temp_elec && $bill_water==$temp_water && $bill_garbage==$temp_garbage){
@@ -670,8 +935,61 @@
 		  			$this->db->update('consumer_bill',$data);
 	  			}
   		}
+  		// function update_partial_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$receiptNo,$receiptDate,$date_updated,$updated_by){
 
-  		function update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$surcharge,$receiptNo,$receiptDate,$date_updated,$updated_by){
+
+  		// 	$query = $this->db->query("select electricity_amount_paid, water_amount_paid,garbage_amount_paid from consumer_collection where bill_id=".$bill_id);
+  		// 	$temp = $query->result_array();
+	  	// 	// 	//print_r($temp_garbage);
+	  	// 	$temp_elec = $temp[0]['electricity_amount_paid'] + $electricity;
+	  	// 	$temp_water = $temp[0]['water_amount_paid'] + $water;
+	  	// 	$temp_garbage = $temp[0]['garbage_amount_paid'] + $garbage;
+
+	  	// 	//echo "<br><br><br>".$temp_elec." ".$temp_water." ".$temp_garbage;
+
+
+	  	// 	$query = $this->db->query("select electricity_reading, water_reading,garbage_fee from consumer_bill where id=".$bill_id);
+	  	// 	$temp = $query->result_array();
+	  	// 	// 	//print_r($temp_garbage);
+	  	// 	$bill_elec = $temp[0]['electricity_reading'];
+	  	// 	$bill_water = $temp[0]['water_reading'];
+	  	// 	$bill_garbage = $temp[0]['garbage_fee'];
+
+	  	// 	//echo "<br>".$bill_elec." ".$bill_water." ".$bill_garbage;
+
+  				
+  		// 	$data=array(
+
+		  //   		'electricity_amount_paid'=>$temp_elec,
+		  //   		'water_amount_paid'=>$temp_water,
+		  //   		'garbage_amount_paid'=>$temp_garbage,
+		  //   		'receipt_number'=>$receiptNo,
+		  //   		'receipt_date'=>$receiptDate,
+		  //   		'date_updated'=>$date_updated,
+		  //   		'updated_by' =>$updated_by
+				// 	);
+  		// 		$this->db->where('bill_id',$bill_id);
+	  	// 		$this->db->update('consumer_collection',$data);
+
+
+	  	// 		if($bill_elec==$temp_elec && $bill_water==$temp_water && $bill_garbage==$temp_garbage){
+	  	// 			$data=array(
+	   //  				'is_paid'=>1
+				// 	);
+		  // 			$this->db->where('id',$bill_id);
+		  // 			$this->db->update('consumer_bill',$data);
+
+	  	// 			//echo "<br><br>TRUEEEE";
+	  	// 		}else{
+	  	// 			$data=array(
+	   //  				'is_paid'=>0
+				// 	);
+		  // 			$this->db->where('id',$bill_id);
+		  // 			$this->db->update('consumer_bill',$data);
+	  	// 		}
+  		// }
+
+  		function update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$surcharge,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_updated,$updated_by){
 
   			$data=array(
 
@@ -679,8 +997,6 @@
 		    		'water_amount_paid'=>$water,
 		    		'garbage_amount_paid'=>$garbage,
 		    		'surcharge'=>$surcharge,
-		    		'receipt_number'=>$receiptNo,
-		    		'receipt_date'=>$receiptDate,
 		    		'date_updated'=>$date_updated,
 		    		'updated_by' =>$updated_by
 					);
@@ -725,6 +1041,105 @@
 		  			$this->db->update('consumer_bill',$data);
 	  			}
 
+	  		$query = $this->db->query("select utility_type, receipt_date from receipt where bill_id=".$bill_id);
+	  		$temp2 = $query->result_array();
+	  		//echo "<br><br>";
+	  		//print_r($temp2);
+	  		$has_elec_receipt = false;
+	  		$has_water_receipt = false;
+	  		$has_garbage_receipt = false;
+
+	  		foreach ($temp2 as $result) {
+	  			if($result['utility_type']==1){
+	  				$has_elec_receipt = true;
+	  			}
+	  			else if($result['utility_type']==2){
+	  				$has_water_receipt = true;
+	  			}else if($result['utility_type']==3){
+	  				$has_garbage_receipt=true;
+	  			}
+	  		}
+	  			//UPDATE IF TO BE EDITED; INSERT ALL TO TABLE IF ADDED TO COLLECTION
+	  			if($e_receiptDate!=NULL || $e_receiptDate!=""){
+					if($has_elec_receipt == true){
+						//echo "<br><br><br>R: ".$e_receiptDate;
+						$data2=array(
+				    		'receipt_no'=>$e_receiptNo,
+				    		'receipt_date'=>$e_receiptDate,
+				    		'date_updated'=>$date_updated,
+				    		'added_by' =>$updated_by
+						);
+						$this->db->where('utility_type',1);
+						$this->db->where('bill_id',$bill_id);
+	  					$this->db->update('receipt',$data2);
+					}else{
+						$data2=array(
+				    		'bill_id'=>$bill_id,
+				    		'utility_type'=>1,
+				    		'receipt_no'=>$e_receiptNo,
+				    		'receipt_date'=>$e_receiptDate,
+				    		'date_added'=>$date_updated,
+				    		'added_by' =>$updated_by
+						);
+						$this->db->insert('receipt',$data2);
+					}
+				
+  				}
+  				
+
+  				if($w_receiptDate!=NULL || $w_receiptDate!=""){
+  					//echo "herreeeee";
+  					if($has_water_receipt == true){
+						//echo "<br><br><br>R: ".$e_receiptDate;
+						$data3=array(
+				    		'receipt_no'=>$w_receiptNo,
+				    		'receipt_date'=>$w_receiptDate,
+				    		'date_updated'=>$date_updated,
+				    		'added_by' =>$updated_by
+						);
+						$this->db->where('utility_type',2);
+						$this->db->where('bill_id',$bill_id);
+	  					$this->db->update('receipt',$data3);
+					}else{
+						$data3=array(
+			    		'bill_id'=>$bill_id,
+			    		'utility_type'=>2,
+			    		'receipt_no'=>$w_receiptNo,
+			    		'receipt_date'=>$w_receiptDate,
+			    		'date_updated'=>$date_updated,
+			    		'added_by' =>$updated_by
+						);
+						$this->db->insert('receipt',$data3);
+					}
+					
+  				}
+  				
+  				if($g_receiptDate!=NULL || $g_receiptDate!=""){
+  					if($has_garbage_receipt == true){
+						//echo "<br><br><br>R: ".$e_receiptDate;
+						$data4=array(
+				    		'receipt_no'=>$g_receiptNo,
+				    		'receipt_date'=>$g_receiptDate,
+				    		'date_updated'=>$date_updated,
+				    		'added_by' =>$updated_by
+						);
+						$this->db->where('utility_type',3);
+						$this->db->where('bill_id',$bill_id);
+	  					$this->db->update('receipt',$data4);
+					}else{
+			    		$data4=array(
+			    		'bill_id'=>$bill_id,
+			    		'utility_type'=>3,
+			    		'receipt_no'=>$g_receiptNo,
+			    		'receipt_date'=>$g_receiptDate,
+			    		'date_updated'=>$date_updated,
+			    		'added_by' =>$updated_by
+						);
+						$this->db->insert('receipt',$data4);
+					}
+					
+  				}
+
 
 	  		}
 
@@ -739,14 +1154,12 @@
 
  		function get_yearly_collections_for_report_view($year,$account_no){
 			//echo "<br><br>ditooooooooo";
-			$query = $this->db->query("select a.bill_month, a.electricity_reading, a.water_reading, a.garbage_fee, b.fullname,b.address,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, c.surcharge, c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where a.bill_year=".$year." and b.account_no=".$account_no);
+			$query = $this->db->query("select a.id,a.bill_month, a.electricity_reading, a.water_reading, a.garbage_fee, b.fullname,b.address,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, c.surcharge, c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where a.bill_year=".$year." and b.account_no=".$account_no);
 
 			return $query->result_array();
 
 
  		} //end of get consumers
-
-
 
 
 

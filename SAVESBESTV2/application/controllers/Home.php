@@ -179,6 +179,25 @@ Class accessed if user has successfully logged in
 	        }
 		}
 
+
+		
+		function viewConsumersForYearBalance(){
+            if($this->session->userdata('logged_in')){
+				$session_data = $this->session->userdata('logged_in');
+				$data['username'] = $session_data['username'];
+				$data['userid'] = $session_data['userid'];
+	        	$data['usertype'] = $session_data['usertype'];
+
+	        	//$resultdata['results'] = $this->user->get_consumers_for_reading();
+	        	$resultdata['results'] = $this->user->get_consumers();
+		        $resultdata['username']=$data['username'];
+		        $this->load->view('template/header_template_view');
+		        $this->load->view('add_year_balance_view',$resultdata);
+	        }else{
+	            redirect('login','refresh');
+	        }
+		}
+
 		function viewImportedConsumersBills(){
             if($this->session->userdata('logged_in')){
 				$session_data = $this->session->userdata('logged_in');
@@ -340,6 +359,8 @@ Class accessed if user has successfully logged in
 
 						//access User.php model to get_consumers from the database
 						$resultdata['results'] = $this->user->get_consumer_collection_not_paid();
+						//$resultdata['id_arr'] = $this->user->get_id_consumer_collection_not_paid();
+						$resultdata['receipt_results'] = $this->user->get_receipt_per_bill();
 						$resultdata['username']=$data['username'];
 
 						$this->load->view('template/header_template_view');
@@ -349,6 +370,79 @@ Class accessed if user has successfully logged in
 						redirect('login','refresh');
 				}
 		}//end of viewReadingsForCollection function
+
+		function queryBillsToView(){
+						//open page to query month and year of collection to be viewed
+				if($this->session->userdata('logged_in')){
+						$session_data = $this->session->userdata('logged_in');
+						$data['username'] = $session_data['username'];
+						$data['userid'] = $session_data['userid'];
+						$data['usertype'] = $session_data['usertype'];
+
+						$temp_no = $this->input->post('account_no');
+		                $temp_month = $this->input->post('month');
+		                $temp_year = $this->input->post('year');
+		                $month = intval($temp_month);
+		                $year = intval($temp_year);
+		                $account_no = intval($temp_no);
+
+						//access User.php model to get_consumers from the database
+						$resultdata['results'] = $this->user->get_consumer_billings_by_month_year($month,$year);
+						//  $resultdata['results'] = $this->user->get_collections_for_edit_by_account($account_no,$month,$year);
+		    //             $count = count($resultdata['results']);
+		               // // echo "<br><br>COUNT: ".$count;
+		               //  if($count > 0){
+		               //      $resultdata['ok'] = true;
+		               //  }else{
+		               //      $resultdata['ok'] = false;
+		               //  }
+						//$resultdata['ok'] = 0;
+						$resultdata['username']=$data['username'];
+
+						$this->load->view('template/header_template_view');
+						$this->load->view('query_bills_to_view',$resultdata);
+
+				}else{
+						redirect('login','refresh');
+				}
+		}//end of viewReadingsForCollection function
+
+		function queryImportedConsumersBillsByMonthYear(){
+						//open page to query month and year of collection to be viewed
+				if($this->session->userdata('logged_in')){
+						$session_data = $this->session->userdata('logged_in');
+						$data['username'] = $session_data['username'];
+						$data['userid'] = $session_data['userid'];
+						$data['usertype'] = $session_data['usertype'];
+
+						$temp_no = $this->input->post('account_no');
+		                $temp_month = $this->input->post('month');
+		                $temp_year = $this->input->post('year');
+		                $month = intval($temp_month);
+		                $year = intval($temp_year);
+		                $account_no = intval($temp_no);
+
+						//access User.php model to get_consumers from the database
+						$resultdata['results'] = $this->user->get_consumer_billings_by_month_year($month,$year);
+						//  $resultdata['results'] = $this->user->get_collections_for_edit_by_account($account_no,$month,$year);
+		    //             $count = count($resultdata['results']);
+		               // // echo "<br><br>COUNT: ".$count;
+		               //  if($count > 0){
+		               //      $resultdata['ok'] = true;
+		               //  }else{
+		               //      $resultdata['ok'] = false;
+		               //  }
+						//$resultdata['ok'] = 0;
+						$resultdata['username']=$data['username'];
+
+						$this->load->view('template/header_template_view');
+						$this->load->view('query_imported_bills_view',$resultdata);
+
+				}else{
+						redirect('login','refresh');
+				}
+		}//end of viewReadingsForCollection function
+
 
 		function viewBillingsForCollection(){
 						//list users
@@ -463,6 +557,8 @@ Class accessed if user has successfully logged in
 						//access User.php model to get_consumers from the database
 						//$resultdata['results'] = $this->user->get_all_collections();
 						$resultdata['username']=$data['username'];
+
+						  $resultdata['receipt_results'] = $this->user->get_receipt_per_bill();
 
 						$this->load->view('template/header_template_view');
 						$this->load->view('query_all_collections_view',$resultdata);

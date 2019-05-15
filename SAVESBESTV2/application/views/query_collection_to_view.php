@@ -33,7 +33,7 @@
 
     <div style="margin-left:5%;">
       <h4 style="color:darkgreen;"><b>Edit Consumer Payment / Add Surcharge Page</b></h4>
-      <p>This page will allow you to EDIT a consumers' collection/payment entry given the ACCOUNT NO. and PAYMENT month and year.</p>
+      <p>This page will allow you to EDIT a consumers' collection/payment entry given the ACCOUNT NO. and BILL month and year.</p>
       <h4>Please enter the details to be edited: </h4>
     </div>
     <div class="reg_form">
@@ -46,7 +46,7 @@
           <input type="number" id="account_no" name="account_no" value="<?php echo set_value('account_no'); ?>" class="form-control" placeholder="Enter Account No here" required/>
         </p>
         <p>
-        <label for="month"><span style='color:maroon;'>Payment Month:</span></label>
+        <label for="month"><span style='color:maroon;'>BILL Month:</span></label>
               <select class="form-control" id="month" name="month" value="<?php echo set_value('month'); ?>" required>
                   <option value="1">Jan</option>
                   <option value="2">Feb</option>
@@ -63,7 +63,7 @@
               </select>
         </p>
         <p>
-          <label for="year"><span style='color:maroon;'>Payment Year:</span></label>
+          <label for="year"><span style='color:maroon;'>BILL Year:</span></label>
           <input type="number" id="year" name="year" value="<?php echo set_value('year'); ?>" class="form-control" placeholder="Enter YEAR here" required/>
         </p>
                       
@@ -83,16 +83,15 @@
 
                 echo form_open('Consumer/updateConsumerPaymentInCollection');
 
-                echo '<div style="font-size:0.8em;">';
-
+                echo '<div style="font-size:0.7em;">';
+               // print_r($receipt_results);
                 echo '<table id="myTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >';
                 echo '<thead>
-                           <tr>
+                           <tr">
                               
                                <th>Bill<br>ID</th><th>Name</th><th>Address</th><th>Con.Type</th>
-                               <th>Bill<br>Month</th><th>Bill<br>Year</th><th>Electricity<br>Amt. Paid</th>
-                               <th>Water<br>Amt. Paid</th><th>Garbage<br>Amt. Paid</th>
-                                <th>Surcharge</th><th>OR.No.</th><th>OR.Date</th>
+                               <th>Bill<br>Month</th><th>Bill<br>Year</th><th>Electricity<br>Payment</th><th>Elec<br>OR No</th><th>Elec<br>OR Date</th>
+                               <th>Water<br>Payment</th><th>Wtr<br>OR No</th><th>Wtr<br>OR Date</th><th>Garbage<br>Payment</th><th>Gbg<br>OR No</th><th>Gbg<br>OR Date</th><th>Surcharge</th>
 
                            </tr>
                          </thead>
@@ -129,7 +128,7 @@
                                   }
 
 
-                               
+                                //print_r($receipt_results);
                                  // $consumer_array = array();
                                   echo "<tr style='font-size:1.3em;'>".
 
@@ -139,19 +138,92 @@
                                            "<td>".$result['consumer_type']."</td>".
                                            "<td>".$month."</td>".
                                            "<td>".$result['bill_year']."</td>".
-                                           //"<td>".$result['electricity_reading']."</td>".
-                                           "<td><input type='text' size='7' name='electricity_amount_paid' id='electricity_amount_paid' value='".$result['electricity_amount_paid']."'></td>".
+                                           "<td><input type='text' size='7' name='electricity_amount_paid' id='electricity_amount_paid' value='".$result['electricity_amount_paid']."'></td>";
+                                          //RECEIPT NO AND DATE
+                                           $temp=false;
+                                           foreach($receipt_results as $receipt){
+                                                if($receipt['utility_type']==1){
+                                                  //echo "itooooooo";
+                                                 echo  "<td><input type='text' size='5' name='elec_receipt_no' id='elec_receipt_no' value='".$receipt['receipt_no']."'></td>".
+                                                  "<td><input type='date' size='5' name='elec_receipt_date' id='elec_receipt_date' value='".$receipt['receipt_date']."'></td>";
+                                                  $temp=true;
+                                                  break;
+                                                }else{
+                                                  $temp=false;
+                                                }
+                                           }
+                                           if(!$temp){
+                                             echo  "<td><input type='text' size='5' name='elec_receipt_no' id='elec_receipt_no'></td>".
+                                                  "<td><input type='date' size='5' name='elec_receipt_date' id='elec_receipt_date'></td>";
+                                           }
+                                           
                                            //"<td><input type='text' size='5' name='electricity_amount_paid[".$result['id']."]' id='electricity_amount_paid'></td>".
                                            //"<td>".$result['water_reading']."</td>".
-                                           "<td><input type='text' size='7' name='water_amount_paid' id='water_amount_paid' value='".$result['water_amount_paid']."'></td>".
+                                           echo "<td><input type='text' size='7' name='water_amount_paid' id='water_amount_paid' value='".$result['water_amount_paid']."'></td>";
+                                           //RECEIPT NO AND DATE
+                                            $temp=false;
+                                           foreach($receipt_results as $receipt){
+                                                if($receipt['utility_type']==2){
+                                                  //echo "itooooooo";
+                                                 echo  "<td><input type='text' size='5' name='water_receipt_no' id='water_receipt_no' value='".$receipt['receipt_no']."'></td>".
+                                                  "<td><input type='date' size='5' name='water_receipt_date' id='water_receipt_date' value='".$receipt['receipt_date']."'></td>";
+                                                  $temp=true;
+                                                  break;
+                                                }else{
+                                                  $temp=false;
+                                                }
+                                           }
+                                           if(!$temp){
+                                             echo  "<td><input type='text' size='5' name='water_receipt_no' id='water_receipt_no'></td>".
+                                                  "<td><input type='date' size='5' name='water_receipt_date' id='water_receipt_date'></td>";
+                                           }
                                            //"<td>".$result['garbage_fee']."</td>".
-                                           "<td><input type='text' size='4' name='garbage_amount_paid' id='garbage_amount_paid' value='".$result['garbage_amount_paid']."'></td>".
+                                           echo "<td><input type='text' size='5' name='garbage_amount_paid' id='garbage_amount_paid' value='".$result['garbage_amount_paid']."'></td>";
 
-                                           "<td><input type='text' size='4' name='surcharge' id='surcharge' value='".$result['surcharge']."'></td>".
+                                           //RECEIPT NO AND DATE
+                                            $temp=false;
+                                           foreach($receipt_results as $receipt){
+                                                if($receipt['utility_type']==3){
+                                                  //echo "itooooooo";
+                                                 echo  "<td><input type='text' size='5' name='garbage_receipt_no' id='garbage_receipt_no' value='".$receipt['receipt_no']."'></td>".
+                                                  "<td><input type='date' size='5' name='garbage_receipt_date' id='garbage_receipt_date' value='".$receipt['receipt_date']."'></td>";
+                                                  $temp=true;
+                                                  break;
+                                                }else{
+                                                  $temp=false;
+                                                }
+                                           }
+                                           if(!$temp){
+                                             echo  "<td><input type='text' size='5' name='garbage_receipt_no' id='garbage_receipt_no'></td>".
+                                                  "<td><input type='date' size='5' name='garbage_receipt_date' id='garbage_receipt_date'></td>";
+                                           }
 
-                                           "<td><input type='text' size='4' name='receipt_no' id='receipt_no' value='".$result['receipt_number']."'></td>".
+                                           echo "<td><input type='text' size='4' name='surcharge' id='surcharge' value='".$result['surcharge']."'></td>".
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                           // "<td><input type='text' size='7' name='electricity_amount_paid' id='electricity_amount_paid' value='".$result['electricity_amount_paid']."'></td>".
+                                           // //"<td><input type='text' size='5' name='electricity_amount_paid[".$result['id']."]' id='electricity_amount_paid'></td>".
+                                           // //"<td>".$result['water_reading']."</td>".
+                                           // "<td><input type='text' size='7' name='water_amount_paid' id='water_amount_paid' value='".$result['water_amount_paid']."'></td>".
+                                           // //"<td>".$result['garbage_fee']."</td>".
+                                           // "<td><input type='text' size='4' name='garbage_amount_paid' id='garbage_amount_paid' value='".$result['garbage_amount_paid']."'></td>".
+
+                                           // "<td><input type='text' size='4' name='surcharge' id='surcharge' value='".$result['surcharge']."'></td>".
+
+                                           // "<td><input type='text' size='4' name='receipt_no' id='receipt_no' value='".$result['receipt_number']."'></td>".
                                   
-                                           "<td><input type='date' size='4' name='receipt_date' id='receipt_date' value='".$result['receipt_date']."'><input type='hidden' name='bill_id' id='bill_id' value=' ".$result['id']." ' /></td>".
+                                           "<input type='hidden' name='bill_id' id='bill_id' value=' ".$result['id']." ' />".
                                             "</tr>";
                                            //$i=$i+1;
                                          
