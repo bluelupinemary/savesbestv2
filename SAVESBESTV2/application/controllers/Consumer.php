@@ -516,7 +516,11 @@ function showImportedBillings(){
 
                  $g_receiptNo = $this->input->post('garbage_receipt_no');
                  $g_receiptDate = $this->input->post('garbage_receipt_date');
-               //print_r($ea);
+
+                $consumer_id = $this->input->post('consumer_id');
+                $bill_year = $this->input->post('year');
+                $bill_month = $this->input->post('month');
+                //print_r($consumer_id);
                 //$num_consumers = count($consumers);
                 $date = date('Y-m-d');
                 //echo "<br>Count:".$num_consumers."<br>"; 
@@ -528,7 +532,7 @@ function showImportedBillings(){
                      //"| R: ".$e_receiptNo[$id]."| D: ".$e_receiptDate[$id].
                     // "<br>";
                     // $this->user->add_payment_to_consumer_collection($id,$electricity[$id],$water[$id],$garbage[$id],$receiptNo[$id],$receiptDate[$id],$date);
-                    $this->user->add_payment_to_consumer_collection($id,$electricity[$id],$water[$id],$garbage[$id],$e_receiptNo[$id],$e_receiptDate[$id],$w_receiptNo[$id],$w_receiptDate[$id],$g_receiptNo[$id],$g_receiptDate[$id], $date, $username);
+                    $this->user->add_payment_to_consumer_collection($id,$consumer_id[$id],$electricity[$id],$water[$id],$garbage[$id],$e_receiptNo[$id],$e_receiptDate[$id],$w_receiptNo[$id],$w_receiptDate[$id],$g_receiptNo[$id],$g_receiptDate[$id], $bill_month, $bill_year, $date, $username);
 
 
                     $resultdata['ok'] = true;
@@ -539,6 +543,8 @@ function showImportedBillings(){
                 $month=0;
                 $year=0;
                 $resultdata['results'] = $this->user->get_consumer_billings_by_month_year($month,$year);
+                $resultdata['bill_month'] = $bill_month;
+                $resultdata['bill_year'] = $bill_year;
 
 
                 $this->load->view('template/header_template_view');
@@ -725,6 +731,8 @@ function showImportedBillings(){
 
                 //echo "<br><br><br><br><br><br><br> >>>>>.".$month.">>>".$year;
                 $resultdata['username'] = $data['username'];
+                $resultdata['bill_year'] = $year;
+                $resultdata['bill_month'] = $month;
                 $resultdata['results'] = $this->user->get_consumer_billings_by_month_year($month,$year);
                 $count = count($resultdata['results']);
                 //echo "<br><br>COUNT: ".$count;
@@ -760,7 +768,7 @@ function showImportedBillings(){
 
                 //echo "<br><br><br><br><br><br><br> >>>>>.".$month.">>>".$year;
                 $resultdata['username'] = $data['username'];
-                $resultdata['results'] = $this->user->get_consumer_billings_by_month_year($month,$year);
+                $resultdata['results'] = $this->user->get_consumer_billings_by_month_year_for_listing($month,$year);
                 $count = count($resultdata['results']);
                 //echo "<br><br>COUNT: ".$count;
                 if($count > 0){
@@ -873,9 +881,9 @@ function showImportedBillings(){
                     $data['userid'] = $session_data['userid'];
                     $data['usertype'] = $session_data['usertype']; 
 
-                    $account_no = $this->input->post('account_no');
+                     $account_no = $this->input->post('account_no');
                      $month = $this->input->post('payment_month');
-                      $year = $this->input->post('payment_year');
+                     $year = $this->input->post('payment_year');
                      $bill_id = $this->input->post('bill_id');
                      $electricity = $this->input->post('electricity_amount_paid');
                      $water = $this->input->post('water_amount_paid');
@@ -892,6 +900,10 @@ function showImportedBillings(){
 
                      $g_receiptNo = $this->input->post('garbage_receipt_no');
                      $g_receiptDate = $this->input->post('garbage_receipt_date');
+
+                     if($surcharge==NULL || $surcharge == ""){
+                        $surcharge = 0;
+                     }
                    
 
                    // $num_consumers = count($consumers);
@@ -901,9 +913,12 @@ function showImportedBillings(){
                      // echo "<br>".$garbage;
                      // echo "<br>".$receiptNo;
                      // echo "<br>".$receiptDate;
-                    $date_updated = date('Y-m-d');         
-                   $this->user->update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$surcharge,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_updated,$updated_by);
+                    $date_updated = date('Y-m-d');
+                if($bill_id==NULL || $bill_id==""){
 
+                }else{     
+                   $this->user->update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$surcharge,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_updated,$updated_by);
+                }
                    //$resultdata['results'] = $this->user->get_collections_for_edit($bill_id);
                   //$resultdata['results'] =  $resultdata['username'] = $data['username'];
                 $resultdata['results'] = $this->user->get_collections_for_edit_by_account($account_no,$month,$year);
@@ -925,7 +940,9 @@ function showImportedBillings(){
                 }
 
 
-                $resultdata['receipt_results'] = $this->user->get_receipt_per_consumer_account($bill_id);
+                  $resultdata['receipt_results'] = $this->user->get_receipt_per_consumer_account($bill_id);
+              
+               
 
                  
                   

@@ -162,7 +162,7 @@
                                            "<td><input type='text' size='5' name='garbage_amount_paid[".$result['id']."]' id='garbage_amount_paid' value='".$result['garbage_fee']."'></td>".
                                             //GARBAGE OR NO AND DATE FIELDS
                                            "<td><input type='text' size='5' name='garbage_receipt_no[".$result['id']."]' id='garbage_receipt_no'></td>".
-                                           "<td><input type='date' size='5' name='garbage_receipt_date[".$result['id']."]' id='garbage_receipt_date'><input type='hidden' name='consumers[]' id='consumers' value=' ".$result['id']." ' /></td>".
+                                           "<td><input type='date' size='5' name='garbage_receipt_date[".$result['id']."]' id='garbage_receipt_date'><input type='hidden' name='consumers[]' id='consumers' value=' ".$result['id']." ' /><input type='hidden' name='consumer_id[".$result['id']."]' id='consumer_id' value=' ".$result['consumer_id']." ' /></td>".
 
                                             "</tr>";
                                            //$i=$i+1;
@@ -180,6 +180,9 @@
                           }
                            echo "<button style='float:right;' data-toggle='tooltip' title='SAVE PAYMENT' type='submit' class='btn btn-warning'>SAVE PAYMENT</button>";
                                 //echo form_button($delete_button);
+
+                           echo '<input type="hidden" id="year" name="year" value="'.$bill_year.'"/>';
+                           echo '<input type="hidden" id="month" name="month" value="'.$bill_month.'"/>';
                           
                        "</form></div>";
                       echo form_close();

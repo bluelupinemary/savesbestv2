@@ -542,6 +542,20 @@
 
  		} //end of get consumers
 
+ 		function get_consumer_billings_by_month_year_for_listing($month, $year){
+
+			// $this->db->select('consumer_reading.*');
+			// $this->db->from('consumer_reading');
+			// $this->db->where_not_in('consumer_reading.id',$consumer_id);
+			// //$this->db->limit(1);
+
+			// $query = $this->db->get();
+		$query = $this->db->query("select a.*,b.fullname as fullname,b.account_no, b.address,b.consumer_type from consumer_bill a join consumer b on a.consumer_id=b.id where a.bill_month=".$month." and a.bill_year=".$year);
+			return $query->result_array();
+
+
+ 		} //end of get consumers
+
  		function get_consumer_billings_for_collection(){
 
 			// $this->db->select('consumer_reading.*');
@@ -618,7 +632,7 @@
 
  		} //end of get consumers
 
- 		function add_payment_to_consumer_collection($bill_id,$electricity,$water,$garbage,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_added,$username){
+ 		function add_payment_to_consumer_collection($bill_id,$consumer_id,$electricity,$water,$garbage,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$bill_month, $bill_year, $date_added,$username){
   				$data=array(
 		    		'bill_id'=>$bill_id,
 		    		'electricity_amount_paid'=>$electricity,
@@ -682,7 +696,7 @@
 					$this->db->insert('receipt',$data4);
   				}
 
-	  		 	if($bill_elec_amount==$electricity && $bill_water_amount==$water && $bill_garbage_amount==$garbage){
+	  		 	if($bill_elec_amount>=$electricity && $bill_water_amount>=$water && $bill_garbage_amount>=$garbage){
 	  				$data=array(
 	    				'is_paid'=>1
 					);
@@ -691,7 +705,274 @@
 	  			}
 
 
-	  	// 		
+
+	  			//START OF CHECKING FOR CONSUMER_ELECTRIC_BALANCE
+
+
+	  			$prev_year = intval($bill_year)-1;
+	  			//check if the consumer has an electric overpayment/underpayment from the previous year
+	  			$query = $this->db->query("select * from consumer_electric_balance where consumer_id=".$consumer_id." and balance_year=".$prev_year);
+	  			$prev_elec = $query->result_array();
+	  			//placeholder values only
+	  			$prev_elec_bal = 0;
+	  			$prev_elec_bal_year = NULL;
+	  		
+	  			$count2 = count ($prev_elec);
+	  			//if there is an existing electric balance from the previous year
+	  			if($count2 > 0){
+	  				$prev_elec_bal = $prev_elec[0]['balance_amount'];
+	  				$prev_elec_bal_year = $prev_elec[0]['balance_year'];
+	  			}
+	  			
+
+	  			//check if consumer has existing balance for the current year
+	  			$query = $this->db->query("select * from consumer_electric_balance where consumer_id=".$consumer_id." and balance_year=".$bill_year);
+	  			$temp_elec = $query->result_array();
+	  			//placeholder values only
+	  			$elec_bal = 0;
+	  			$elec_bal_year = NULL;
+	  		
+	  			$count = count ($temp_elec);
+
+
+
+	  			//if there is no record yet of the current year's electric balance and if the current bill is the first month of the year
+				if($count==0){
+					//check for an overpayment for the current month
+					$elec_overpayment=0;
+					$elec_current_balance=0;
+					$total_elec_bal = $prev_elec_bal;
+					
+					// if there is an overpayment in the current month-year collection
+	  				if($electricity > $bill_elec_amount){
+	  					$elec_overpayment = $electricity - $bill_elec_amount;
+	  					$total_elec_bal = $total_elec_bal - $elec_overpayment;
+	  				}
+	  				//else if the consumer has an underpayment for the current month
+	  				else if($electricity < $bill_elec_amount){
+	  					$elec_current_balance = $bill_elec_amount - $electricity;
+	  					$total_elec_bal = $total_elec_bal + $elec_current_balance;
+	  				}
+
+	  				//insert the current year's balance to the database
+	  				$data5=array(
+		    		'balance_amount'=>$total_elec_bal,
+		    		'balance_year'=>$bill_year,
+		    		'consumer_id'=>$consumer_id
+					);
+					$this->db->insert('consumer_electric_balance',$data5);
+	  			}
+
+	  			//there is an existing record for the current year and month is not the first month of the year
+	  			else if($count > 0){
+	  				$elec_bal = $temp_elec[0]['balance_amount'];
+	  				$elec_bal_year = $temp_elec[0]['balance_year'];
+
+	  				$elec_overpayment=0;
+					$elec_current_balance=0;
+					$total_elec_bal = $elec_bal;
+					
+					// if there is an overpayment in the current month-year collection
+	  				if($electricity > $bill_elec_amount){
+	  					$elec_overpayment = $electricity - $bill_elec_amount;
+	  					$total_elec_bal = $total_elec_bal - $elec_overpayment;
+	  					//echo "<br><br><br> ".$total_elec_bal;
+	  				}
+	  				//else if the consumer has an underpayment for the current month
+	  				else if($electricity < $bill_elec_amount){
+	  					$elec_current_balance = $bill_elec_amount - $electricity;
+	  					$total_elec_bal = $total_elec_bal + $elec_current_balance;
+	  					//echo "<br><br><br> ".$total_elec_bal;
+	  				}
+
+	  				//update the current year's balance in the database
+	  				$data6=array(
+		    			'balance_amount'=>$total_elec_bal,
+					);
+					$this->db->where('consumer_id',$consumer_id);
+		  			$this->db->where('balance_year',$bill_year);
+		  			$this->db->update('consumer_electric_balance',$data6);
+	  				
+	  			} // END OF CHECKING FOR CONSUMER ELECTRIC BALANCE
+
+
+
+
+	  	// 		//==============START OF CHECKING FOR CONSUMER WATER BALANCE
+
+	  			$prev_year = intval($bill_year)-1;
+	  			//check if the consumer has an electric overpayment/underpayment from the previous year
+	  			$query = $this->db->query("select * from consumer_water_balance where consumer_id=".$consumer_id." and balance_year=".$prev_year);
+	  			$prev_water = $query->result_array();
+	  			//placeholder values only
+	  			$prev_water_bal = 0;
+	  			$prev_water_bal_year = NULL;
+	  		
+	  			$count2 = count ($prev_water);
+	  			//if there is an existing electric balance from the previous year
+	  			if($count2 > 0){
+	  				$prev_water_bal = $prev_water[0]['balance_amount'];
+	  				$prev_water_bal_year = $prev_water[0]['balance_year'];
+	  			}
+
+	  			//check if consumer has existing balance for the current year
+	  			$query = $this->db->query("select * from consumer_water_balance where consumer_id=".$consumer_id." and balance_year=".$bill_year);
+	  			$temp_water = $query->result_array();
+	  			//placeholder values only
+	  			$water_bal = 0;
+	  			$water_bal_year = NULL;
+	  		
+	  			$count = count ($temp_water);
+
+
+
+	  			//if there is no record yet of the current year's electric balance and if the current bill is the first month of the year
+				if($count==0){
+					//check for an overpayment for the current month
+					$water_overpayment=0;
+					$water_current_balance=0;
+					$total_water_bal = $prev_water_bal;
+					
+					// if there is an overpayment in the current month-year collection
+	  				if($water > $bill_water_amount){
+	  					$water_overpayment = $water - $bill_water_amount;
+	  					$total_water_bal = $total_water_bal - $water_overpayment;
+	  				}
+	  				//else if the consumer has an underpayment for the current month
+	  				else if($water < $bill_water_amount){
+	  					$water_current_balance = $bill_water_amount - $water;
+	  					$total_water_bal = $total_water_bal + $water_current_balance;
+	  				}
+
+	  				//insert the current year's balance to the database
+	  				$data7=array(
+		    		'balance_amount'=>$total_water_bal,
+		    		'balance_year'=>$bill_year,
+		    		'consumer_id'=>$consumer_id
+					);
+					$this->db->insert('consumer_water_balance',$data7);
+	  			}
+
+	  			//there is an existing record for the current year and month is not the first month of the year
+	  			else if($count > 0){
+	  				$water_bal = $temp_water[0]['balance_amount'];
+	  				$water_bal_year = $temp_water[0]['balance_year'];
+
+	  				$water_overpayment=0;
+					$water_current_balance=0;
+					$total_water_bal = $water_bal;
+					
+					// if there is an overpayment in the current month-year collection
+	  				if($water > $bill_water_amount){
+	  					$water_overpayment = $water - $bill_water_amount;
+	  					$total_water_bal = $total_water_bal - $water_overpayment;
+	  					//echo "<br><br><br> ".$total_water_bal;
+	  				}
+	  				//else if the consumer has an underpayment for the current month
+	  				else if($water < $bill_water_amount){
+	  					$water_current_balance = $bill_water_amount - $water;
+	  					$total_water_bal = $total_water_bal + $water_current_balance;
+	  					//echo "<br><br><br> ".$total_elec_bal;
+	  				}
+
+	  				//update the current year's balance in the database
+	  				$data8=array(
+		    			'balance_amount'=>$total_water_bal,
+					);
+					$this->db->where('consumer_id',$consumer_id);
+		  			$this->db->where('balance_year',$bill_year);
+		  			$this->db->update('consumer_water_balance',$data8);	
+	  			} //END OF WATER BALANCE CHECKING
+
+
+
+	  	// 		//==============START OF CHECKING FOR CONSUMER GARBAGE BALANCE
+	  			$prev_year = intval($bill_year)-1;
+	  			//check if the consumer has an electric overpayment/underpayment from the previous year
+	  			$query = $this->db->query("select * from consumer_garbage_balance where consumer_id=".$consumer_id." and balance_year=".$prev_year);
+	  			$prev_garbage = $query->result_array();
+	  			//placeholder values only
+	  			$prev_garbage_bal = 0;
+	  			$prev_garbage_bal_year = NULL;
+	  		
+	  			$count2 = count ($prev_garbage);
+	  			//if there is an existing electric balance from the previous year
+	  			if($count2 > 0){
+	  				$prev_garbage_bal = $prev_garbage[0]['balance_amount'];
+	  				$prev_garbage_bal_year = $prev_garbage[0]['balance_year'];
+	  			}
+
+	  			//check if consumer has existing balance for the current year
+	  			$query = $this->db->query("select * from consumer_garbage_balance where consumer_id=".$consumer_id." and balance_year=".$bill_year);
+	  			$temp_garbage= $query->result_array();
+	  			//placeholder values only
+	  			$garbage_bal = 0;
+	  			$garbage_bal_year = NULL;
+	  		
+	  			$count = count ($temp_garbage);
+
+
+
+	  			//if there is no record yet of the current year's electric balance and if the current bill is the first month of the year
+				if($count==0){
+					//check for an overpayment for the current month
+					$garbage_overpayment=0;
+					$garbage_current_balance=0;
+					$total_garbage_bal = $prev_garbage_bal;
+					
+					// if there is an overpayment in the current month-year collection
+	  				if($garbage > $bill_garbage_amount){
+	  					$garbage_overpayment = $garbage - $bill_garbage_amount;
+	  					$total_garbage_bal = $total_garbage_bal - $garbage_overpayment;
+	  				}
+	  				//else if the consumer has an underpayment for the current month
+	  				else if($garbage < $bill_garbage_amount){
+	  					$garbage_current_balance = $bill_garbage_amount - $garbage;
+	  					$total_garbage_bal = $total_garbage_bal + $garbage_current_balance;
+	  				}
+
+	  				//insert the current year's balance to the database
+	  				$data9=array(
+		    		'balance_amount'=>$total_garbage_bal,
+		    		'balance_year'=>$bill_year,
+		    		'consumer_id'=>$consumer_id
+					);
+					$this->db->insert('consumer_garbage_balance',$data9);
+	  			}
+
+	  			//there is an existing record for the current year and month is not the first month of the year
+	  			else if($count > 0){
+	  				$garbage_bal = $temp_garbage[0]['balance_amount'];
+	  				$garbage_bal_year = $temp_garbage[0]['balance_year'];
+
+	  				$garbage_overpayment=0;
+					$garbage_current_balance=0;
+					$total_garbage_bal = $garbage_bal;
+					
+					// if there is an overpayment in the current month-year collection
+	  				if($garbage > $bill_garbage_amount){
+	  					$garbage_overpayment = $garbage - $bill_garbage_amount;
+	  					$total_garbage_bal = $total_garbage_bal - $garbage_overpayment;
+	  					//echo "<br><br><br> ".$total_elec_bal;
+	  				}
+	  				//else if the consumer has an underpayment for the current month
+	  				else if($garbage < $bill_garbage_amount){
+	  					$garbage_current_balance = $bill_garbage_amount - $garbage;
+	  					$total_garbage_bal = $total_garbage_bal + $garbage_current_balance;
+	  					//echo "<br><br><br> ".$total_elec_bal;
+	  				}
+
+	  				//update the current year's balance in the database
+	  				$data10=array(
+		    			'balance_amount'=>$total_garbage_bal,
+					);
+					$this->db->where('consumer_id',$consumer_id);
+		  			$this->db->where('balance_year',$bill_year);
+		  			$this->db->update('consumer_garbage_balance',$data10);	
+	  			}
+
+
+	  			
   			
   		}//end of function
 
@@ -1186,1116 +1467,7 @@
 
 
 
- 		function delete_user_profile($userid){
-
-
- 			//$usertype = $this->input->post('usertype');
-			$this->db->select('usertype');
-			$this->db->from('user_table');
-			$this->db->where('userid',$userid);
-			$this->db->limit(1);
-			$query = $this->db->get();
-  			$usertype = $query->row();
-
-
-  			if ($query->num_rows() > 0) {
-
-
-
-
-	 			if($usertype->usertype==1){	//if admin
-	 					//$this->db->where('userid',$userid);
-	  					//$this->db->delete('user_in_section');
-
-	  					$this->db->where('userid',$userid);
-	  					$this->db->delete('admin');
-
-	  					$this->db->where('userid',$userid);
-	  					$this->db->delete('user_table');
-
-	  			}else
-	  			if($usertype->usertype==2){ //if teacher
-	  					/*$this->db->select('empid');
-			  			$this->db->from('teacher');
-			  			$this->db->where('userid',$userid);
-			  			$this->db->limit(1);
-			  			$query = $this->db->get();
-			  			$empid = $query->row_array();
-
-			  			$teacherid['empid'] = $empid['empid'];
-
-	  					$this->db->where('empid',$teacherid['empid']);
-	  					$this->db->delete('student');
-
-	  					$this->db->where('teacherid',$teacherid['empid']);
-	  					$this->db->delete('exercode');	*/
-	  					$this->db->where('userid',$userid);
-	  					$this->db->delete('user_in_section');
-
-	  					$this->db->where('userid',$userid);
-	  					$this->db->delete('teacher');
-
-	  					$this->db->where('userid',$userid);
-	  					$this->db->delete('user_table');
-	  			}
-	  			else{ //student
-	  					$this->db->where('userid',$userid);
-	  					$this->db->delete('user_in_section');
-
-	  					$this->db->where('userid',$userid);
-	  					$this->db->delete('student');
-
-	  					$this->db->where('userid',$userid);
-	  					$this->db->delete('user_table');
-	  			}
-  			}//end of numrows
- 		}// end of delete user function
-
- 		function create_section(){
-
-  			$data=array(
-	    		'sname'=>$this->input->post('sectionname'),
-	    		'scode'=>$this->input->post('sectioncode'),
-	    		'maxnum'=>$this->input->post('sectionmax')
-				);
-
-  			$this->db->insert('section',$data);
- 		}// end of create_section()
-
- 		function get_sections(){
- 			$this->db->select('*');
-			$this->db->from('section');
-			//$this->db->limit(1);
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		}//end of get sections
-
- 		function get_section_info($sectionid){
- 			$this->db->select('*');
-			$this->db->from('section');
-			$this->db->where('sectionid',$sectionid);
-			//$this->db->limit(1);
-
-			$query = $this->db->get();
-
-			return $query->result_array();
- 		}//end of get section info
-
- 		function edit_section_info($sectionid){
-
-  			$data=array(
-	    		'sname'=>$this->input->post('sname'),
-	    		'scode'=>$this->input->post('scode'),
-	    		'maxnum'=>$this->input->post('maxnum')
-
-				);
-  			$this->db->where('sectionid',$sectionid);
-  			$this->db->update('section',$data);
-
- 		}//end of editsectioninfo
-
- 		function delete_section_info($sectionid){
-  			$this->db->where('sectionid',$sectionid);
-        $this->db->delete('user_in_section');
-
-        $this->db->where('sectionid',$sectionid);
-  			$this->db->delete('section');
-
-
- 		}//end of deletesectioninfo
-
- 		function get_user_teacher(){
- 			$this->db->select('user_table.userid,concat(lname,",",fname," ",mname) as name');
-			$this->db->from('teacher');
-			$this->db->join('user_table', 'user_table.userid = teacher.userid');
-			//$this->db->limit(1);
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		}//end of function
-
- 		function get_users_in_section($userid){
- 			$this->db->select('*');
-			$this->db->from('user_in_section');
-			//$this->db->limit(1);
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		}//end of function
-
- 		function assign_teacher_to_section($sectionid,$teacherid){
-  			//$teacherid = $this->input->post($teacherid);
-  			//$sectionid = $this->input->post($sectionid);
-
-  			$this->db->select('userid,sectionid');
-			$this->db->from('user_in_section');
-			//$this->db->where('userid',$teacherid); 	//if may return, nag eexist na yung teacher/ may section na naka assigned
-  			$this->db->where('sectionid',$sectionid);
-			$this->db->where('usertype','2');
-  			//$this->db->limit(1);
-			$query = $this->db->get();
-
-
-  			if($query->num_rows()==1){	//if may teacher na naka aassign sa section, update teacherid
-  				$data=array(
-	    		'userid'=>$teacherid
-				);
-  				$this->db->where('sectionid',$sectionid);
-  				$this->db->update('user_in_section',$data);
-
-  			}else{	//add teacher to section
-  				$data=array(
-	    		'userid'=>$teacherid,
-	    		'sectionid'=>$sectionid,
-	    		'usertype'=>$this->input->post('usertype')
-				);
-  				$this->db->insert('user_in_section',$data);
-  			}
-
- 		}// end of create_section()
-
-		function reassign_teacher_to_section($sectionid,$teacherid){
-  			//$teacherid = $this->input->post($teacherid);
-  			//$sectionid = $this->input->post($sectionid);
-
-  			$this->db->select('userid,sectionid');
-			$this->db->from('user_in_section');
-			//$this->db->where('userid',$teacherid); 	//if may return, nag eexist na yung teacher/ may section na naka assigned
-  			$this->db->where('sectionid',$sectionid);
-  			//$this->db->limit(1);
-			$query = $this->db->get();
-
-
-  			if($query->num_rows()==1){	//if may teacher na naka aassign sa section, update teacherid
-  				$data=array(
-	    		'userid'=>$teacherid
-				);
-  				$this->db->where('sectionid',$sectionid);
-  				$this->db->update('user_in_section',$data);
-
-  			}else{	//add teacher to section
-  				$data=array(
-	    		'userid'=>$teacherid,
-	    		'sectionid'=>$sectionid,
-	    		'usertype'=>$this->input->post('usertype')
-				);
-  				$this->db->insert('user_in_section',$data);
-  			}
-
- 		}// end of create_section()
-
- 		function get_teacher_in_sections(){
- 			$this->db->select('*');
-			$this->db->from('user_in_section');
-			$this->db->where('usertype','2');
-			$query = $this->db->get();
-			return $query->result_array();
- 		}//end of function
-
- 		function get_student_in_sections($userid){
- 			$this->db->select('*');
-			$this->db->from('user_in_section');
-			$this->db->where('userid',$userid);
-			$this->db->limit(1);
-			$query = $this->db->get();
-			return $query->num_rows();
- 		}//end of function
-
- 		function request_enlist_to_section($sectionid,$studentid){
- 			$this->db->select('userid');
-			$this->db->from('pending_section_request');
-  			$this->db->where('userid',$studentid);		//check if the student has already requested enlisment of a section
-  			//$this->db->limit(1);
-			$query = $this->db->get();
-
-
-  			if($query->num_rows()==1){	//if student has already requested, do nothing, else insert to table
-
-
-  			}else{	//add student to request
-  				$data=array(
-			    		'sectionid'=>$sectionid,
-			    		'userid'=>$studentid
-				);
-  				$this->db->insert('pending_section_request',$data);
-  			}
-
-
- 		}//end of function
-
- 		function get_sections_handled($teacherid){
- 			$this->db->select('s.scode, s.sname,s.sectionid,count(p.sectionid) as pendingnum');
-			$this->db->from('section as s');
-			$this->db->join('pending_section_request as p', 'p.sectionid = s.sectionid');
-			$this->db->join('user_in_section as u', 'u.sectionid = s.sectionid');
-			$this->db->where('u.userid',$teacherid);
-			$this->db->group_by(array('s.scode', 's.sname','s.sectionid'));
-			$query = $this->db->get();
-			return $query->result_array();
- 		}//end of function
-
- 		function get_pending_of_section($sectionid){
- 			$this->db->select('s.scode, concat(u.lname," ,",u.fname," ",u.mname) as name,u.address,u.email,u.mobile,u.username,u.userid,s.sectionid');
- 			$this->db->from('section as s');
- 			$this->db->join('pending_section_request as p', 'p.sectionid = s.sectionid');
- 			$this->db->join('user_table as u', 'p.userid = u.userid');
- 			$this->db->where('s.sectionid',$sectionid);
-			$query = $this->db->get();
-			return $query->result_array();
- 		}
-
- 		function approve_enlist_to_sec_by_teacher($sectionid, $studentid, $teacherid){
- 			$this->db->select('userid');
-			$this->db->from('user_in_section');
-  			$this->db->where('userid',$studentid);		//check if the student is already enlisted in a section
-  			//$this->db->limit(1);
-			$query = $this->db->get();
-
-
-  			if($query->num_rows()==1){	//if student has already requested, do nothing, else insert to table
-
-
-  			}else{	//add student to user_in_section
-  				$data=array(
-	    		'userid'=>$studentid,
-	    		'sectionid'=>$sectionid,
-	    		'usertype'=>0,
-				);
-  				$this->db->insert('user_in_section',$data);
-
-  				$herbmeet_data = array(
-  					'uid' => $studentid,
-  					'quizNum' => NULL,
-  					'score' => NULL,
-  				);
-  				$this->db->insert('herbmeet_scores',$herbmeet_data);
-          /*INSERT NEW STUDENTid TO SCORES TABLE (ROOT, STEM, LEAVES...SCORE)*/
-          $rootquiz_data = array(
-            'uid' => $studentid,
-            'quizNum' => NULL,
-            'score' => NULL,
-          );
-          $this->db->insert('rootquiz_scores',$rootquiz_data);
-
-          $stemquiz_data = array(
-            'uid' => $studentid,
-            'quizNum' => NULL,
-            'score' => NULL,
-          );
-          $this->db->insert('stemquiz_scores',$stemquiz_data);
-
-          $leavesquiz_data = array(
-            'uid' => $studentid,
-            'quizNum' => NULL,
-            'score' => NULL,
-          );
-          $this->db->insert('leavesquiz_scores',$leavesquiz_data);
-
-          $reproquiz_data = array(
-            'uid' => $studentid,
-            'quizNum' => NULL,
-            'score' => NULL,
-          );
-          $this->db->insert('reproquiz_scores',$reproquiz_data);
-
-          $diversityquiz_data = array(
-            'uid' => $studentid,
-            'quizNum' => NULL,
-            'score' => NULL,
-          );
-          $this->db->insert('diversityquiz_scores',$diversityquiz_data);
-
-          /*-------*/
-
-  				$expedition_completed = array(
-  					'currExpeditionId' => 0,
-  					'userid' => $studentid,
-  				);
-  				$this->db->insert('user_expedition_completed',$expedition_completed);
-
-  				$expedition_plantslist = array(
-  					'userid' => $studentid,
-  					'expeditionId' => 0,
-  					'plantList'=> NULL,
-  				);
-  				$this->db->insert('user_expedition_plantslist',$expedition_plantslist);
-
-  				$expedition_scores1 = array(
-  					'userid' => $studentid,
-  					'expeditionId' => 1,
-  					'score'=> NULL,
-  					'isDone' => NULL,
-            'hasAddPoints' => NULL,
-  				);
-  				$this->db->insert('user_expedition_scores',$expedition_scores1);
-
-  				$expedition_scores2 = array(
-  					'userid' => $studentid,
-  					'expeditionId' => 2,
-  					'score'=> NULL,
-  					'isDone' => NULL,
-            'hasAddPoints' => NULL,
-  				);
-  				$this->db->insert('user_expedition_scores',$expedition_scores2);
-
-  				$expedition_scores3 = array(
-  					'userid' => $studentid,
-  					'expeditionId' => 3,
-  					'score'=> NULL,
-  					'isDone' => NULL,
-            'hasAddPoints' => NULL,
-  				);
-  				$this->db->insert('user_expedition_scores',$expedition_scores3);
-
-  				$expedition_scores4 = array(
-  					'userid' => $studentid,
-  					'expeditionId' => 4,
-  					'score'=> NULL,
-  					'isDone' => NULL,
-            'hasAddPoints' => NULL,
-  				);
-  				$this->db->insert('user_expedition_scores',$expedition_scores4);
-
-  				$expedition_scores5 = array(
-  					'userid' => $studentid,
-  					'expeditionId' => 5,
-  					'score'=> NULL,
-  					'isDone' => NULL,
-            'hasAddPoints' => NULL,
-  				);
-  				$this->db->insert('user_expedition_scores',$expedition_scores5);
-
-  			}
-  			//update student account - verify with teacher's employee number
-
-  			$this->db->select('empid');
-			$this->db->from('teacher');
-  			$this->db->where('userid',$teacherid);
-  			$this->db->limit(1);
-			$query = $this->db->get();
-  			$empid = $query->row();
-
-  				$data2 = array(
-  					'empid' => $empid->empid
-
-  				);
-  				$this->db->set('dateverified', 'NOW()', FALSE);
-  				$this->db->where('userid',$studentid);
-  				$this->db->update('student',$data2);
-
-
- 			//remove the request from pending requests table
-  			$this->db->where('userid',$studentid);
-  			$this->db->delete('pending_section_request');
-
- 		}//end of function
-
- 		function disapprove_enlist_to_sec_by_teacher($sectionid, $studentid){
-
- 			//remove the request from pending requests table
-  			$this->db->where('userid',$studentid);
-  			$this->db->where('sectionid',$sectionid);
-  			$this->db->delete('pending_section_request');
- 		}//end of fucntion
-
- 		function get_pending_of_all_section($userid){
- 			$this->db->select('s.scode, concat(ut.lname," ,",ut.fname," ",ut.mname) as name,ut.address,ut.username,ut.userid as studentid, p.sectionid');
- 			$this->db->from('pending_section_request as p');
- 			$this->db->join('user_in_section as u', 'p.sectionid = u.sectionid');
- 			$this->db->join('user_table as ut', 'p.userid = ut.userid');
- 			$this->db->join('section as s', 's.sectionid = p.sectionid');
- 			$this->db->where('u.usertype','2');
- 			$this->db->where('u.userid',$userid);
-			$query = $this->db->get();
-			return $query->result_array();
- 		}//end of function
-
- 		function get_students_of_teacher($userid){
- 			$this->db->select('sec.scode,s.userid as studentid,s.sectionid,concat(ut.lname,", ",ut.fname," ",ut.mname) as name, ut.address,ut.username');
- 			$this->db->from('user_in_section as t');
- 			$this->db->join('user_in_section as s', 't.sectionid = s.sectionid');
- 			$this->db->join('user_table as ut', 'ut.userid = s.userid');
- 			$this->db->join('section as sec', 'sec.sectionid = s.sectionid');
- 			$this->db->where('s.usertype','0');
- 			$this->db->where('t.userid',$userid);
-			$this->db->order_by("name", "asc");
-			$query = $this->db->get();
-			return $query->result_array();
- 		}//end of function
-
- 		function remove_student_from_section($sectionid, $studentid){
-
- 			//remove the student from user_in_section table
-  			$this->db->where('userid',$studentid);
-  			$this->db->where('sectionid',$sectionid);
-  			$this->db->delete('user_in_section');
-
-  			//remove the student from herbmeet_scores
-  			$this->db->where('uid',$studentid);
-  			$this->db->delete('herbmeet_scores');
-        /*DELETE STUDENT FROM SCORES TABLE (ROOT, STEM, LEAVES...SCORE)*/
-        $this->db->where('uid',$studentid);
-        $this->db->delete('rootquiz_scores');
-
-        $this->db->where('uid',$studentid);
-        $this->db->delete('stemquiz_scores');
-
-        $this->db->where('uid',$studentid);
-        $this->db->delete('leavesquiz_scores');
-
-        $this->db->where('uid',$studentid);
-        $this->db->delete('reproquiz_scores');
-
-        $this->db->where('uid',$studentid);
-        $this->db->delete('diversityquiz_scores');
-        /**/
-
-  			//remove the student from user_expedition_completed
-  			$this->db->where('userid',$studentid);
-  			$this->db->delete('user_expedition_completed');
-
-  			//remove the student from user_expedition_scores
-  			$this->db->where('userid',$studentid);
-  			$this->db->delete('user_expedition_scores');
-
-  			//remove the student from user_expedition_plantslist
-  			$this->db->where('userid',$studentid);
-  			$this->db->delete('user_expedition_plantslist');
-
-  			//update student table set employeeid verification to NULL
-  			$this->db->set('empid', 'NULL', FALSE);
-  			$this->db->where('userid',$studentid);
-  			$this->db->update('student');
- 		}//end of fucntion
-
- 		function get_all_users_in_section(){
- 			$this->db->distinct();
- 			$this->db->select('userid');
-			$this->db->from('user_in_section');
-			//$this->db->limit(1);
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		}//end of function
-		function get_all_sections_in_section(){
- 			$this->db->distinct();
- 			$this->db->select('sectionid');
-			$this->db->from('user_in_section');
-			//$this->db->limit(1);
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		}//end of function
-
-		function get_teacher_join_section(){
- 			$this->db->select('a.sectionid, a.sname, a.scode, a.maxnum, concat(c.lname, ", ", c.fname, " ", c.mname) as name');
-			$this->db->from('section as a');
-			$this->db->join('user_in_section as b', 'a.sectionid = b.sectionid','left');
-			$this->db->join('user_table as c', 'b.userid = c.userid','left');
-			$this->db->where('b.usertype','2');
-			//$this->db->limit(1);
-
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		}//end of get teacher join sections get_student_with_pending
-
- 		function get_student_with_pending($userid){
- 			$this->db->select('*');
-			$this->db->from('pending_section_request');
-			$this->db->where('userid',$userid);
-			$this->db->limit(1);
-			$query = $this->db->get();
-			return $query->num_rows();
- 		}
-
- 		function get_pending_request_of_student($studentid){
- 			$this->db->select('sectionid');
-			$this->db->from('pending_section_request');
-			$this->db->where('userid',$studentid);
-			$this->db->limit(1);
-			$query = $this->db->get();
-			$sectionid = $query->row();
-
-			return $sectionid->sectionid;
- 		}//end of function
-
-		function get_section_of_student($studentid){
- 			$this->db->select('sectionid');
-			$this->db->from('user_in_section');
-			$this->db->where('userid',$studentid);
-			$this->db->limit(1);
-			$query = $this->db->get();
-			$sectionid = $query->row();
-
-			return $sectionid->sectionid;
- 		}//end of function
-
- 		function get_section_of_student_for_gameStart($studentid){
- 			$this->db->select('sectionid');
-			$this->db->from('user_in_section');
-			$this->db->where('userid',$studentid);
-			$this->db->limit(1);
-			$query = $this->db->get();
-			return $query->row();
- 		}//end of function
-
- 		function get_bot_terms(){
- 			$this->db->select('*');
-			$this->db->from('bot_journal');
-			//$this->db->limit(1);
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get bot terms fxn
-
- 		function get_apothecary_content(){
- 			$this->db->select('*');
-			$this->db->from('apothecary');
-			//$this->db->limit(1);
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get apothecary terms fxn
-
- 		function get_herbmeet_questions(){
- 			$this->db->select('*');
-			$this->db->from('herbologyMeetQA');
-			//$this->db->join('herbologyMeetAnswers as b', 'a.qid = b.ans_qid','left');
-			//$this->db->join('user_table as c', 'b.userid = c.userid','left');
-			//$this->db->where('b.usertype','2');
-			//$this->db->limit(1);
-			$query = $this->db->get();
-
-			return $query->result_array();
- 		} //end of get herb meet terms fxn
-
- 		function get_herbmeet_answers(){
- 			$this->db->select('answer,ans_qid');
-			$this->db->from('herbologyMeetAnswers');
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get herb meet ans fxn
-
-    function get_rootQuiz_questions(){
-      $this->db->select('*');
-      $this->db->from('rootQuizQuestions');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herb root quiz questions fxn
-
-    function get_rootQuiz_answers(){
-      $this->db->select('answer,ans_qid');
-      $this->db->from('rootQuizAnswers');
-
-      $query = $this->db->get();
-
-
-      return $query->result_array();
-    } //end of get root quiz ans fxn
-
-     function get_stemQuiz_questions(){
-      $this->db->select('*');
-      $this->db->from('stemQuizQuestions');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herb stem quiz questions fxn
-
-    function get_stemQuiz_answers(){
-      $this->db->select('answer,ans_qid');
-      $this->db->from('stemQuizAnswers');
-
-      $query = $this->db->get();
-
-
-      return $query->result_array();
-    } //end of get stem quiz ans fxn
-
-    function get_leavesQuiz_questions(){
-      $this->db->select('*');
-      $this->db->from('leavesQuizQuestions');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herb leaves quiz questions fxn
-
-    function get_leavesQuiz_answers(){
-      $this->db->select('answer,ans_qid');
-      $this->db->from('leavesQuizAnswers');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get leaves quiz ans fxn
-
-    function get_reproQuiz_questions(){
-      $this->db->select('*');
-      $this->db->from('reproductionQuizQuestions');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herb reproduction quiz questions fxn
-
-    function get_reproQuiz_answers(){
-      $this->db->select('answer,ans_qid');
-      $this->db->from('reproductionQuizAnswers');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get reproduction quiz ans fxn
-
-    function get_diversityQuiz_questions(){
-      $this->db->select('*');
-      $this->db->from('diversityQuizQuestions');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herb reproduction quiz questions fxn
-
-    function get_diversityQuiz_answers(){
-      $this->db->select('answer,ans_qid');
-      $this->db->from('diversityQuizAnswers');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get reproduction quiz ans fxn
-
-
- 		function save_user_score($studentid,$userscore){
- 			//update herbmeet_score table with score of student
-  			$this->db->set('score', $userscore, FALSE);
-  			$this->db->where('uid',$studentid);
-  			$this->db->update('herbmeet_scores');
-
- 		}//end of function
-
-    function save_user_rootquiz_score($studentid,$userscore){
-      //update rootquiz_scores table with score of student
-        $this->db->set('score', $userscore, FALSE);
-        $this->db->where('uid',$studentid);
-        $this->db->update('rootquiz_scores');
-
-    }//end of function
-
-    function save_user_stemquiz_score($studentid,$userscore){
-      //update stemquiz_scores table with score of student
-        $this->db->set('score', $userscore, FALSE);
-        $this->db->where('uid',$studentid);
-        $this->db->update('stemquiz_scores');
-
-    }//end of function
-
-    function save_user_leavesquiz_score($studentid,$userscore){
-      //update leavesquiz_scores table with score of student
-        $this->db->set('score', $userscore, FALSE);
-        $this->db->where('uid',$studentid);
-        $this->db->update('leavesquiz_scores');
-
-    }//end of function
-
-    function save_user_reproquiz_score($studentid,$userscore){
-      //update leavesquiz_scores table with score of student
-        $this->db->set('score', $userscore, FALSE);
-        $this->db->where('uid',$studentid);
-        $this->db->update('reproquiz_scores');
-
-    }//end of function
-
-    function save_user_diversityquiz_score($studentid,$userscore){
-      //update leavesquiz_scores table with score of student
-        $this->db->set('score', $userscore, FALSE);
-        $this->db->where('uid',$studentid);
-        $this->db->update('diversityquiz_scores');
-
-    }//end of function
-
- 		function get_expedition_questions(){
- 			$this->db->select('*');
-			$this->db->from('expeditionQA');
-			//$this->db->join('herbologyMeetAnswers as b', 'a.qid = b.ans_qid','left');
-			//$this->db->join('user_table as c', 'b.userid = c.userid','left');
-			//
-			//$this->db->limit(1);
-
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get expedition questions fxn
-
- 		function get_currExpeditionId($userid){
- 			$this->db->select('currExpeditionId');
-			$this->db->from('user_expedition_completed');
-			$this->db->where('userid',$userid);
-			//$this->db->join('herbologyMeetAnswers as b', 'a.qid = b.ans_qid','left');
-			//$this->db->join('user_table as c', 'b.userid = c.userid','left');
-			//$this->db->where('b.usertype','2');
-			//$this->db->limit(1);
-
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get expedition questions fxn
-
- 		function save_user_plantslist($studentid,$expeditionId,$plantList){
- 			$data=array(
-	    		'plantList'=>$plantList,
-	    		'expeditionId'=>$expeditionId
-				);
-  				$this->db->where('userid',$studentid);
-  				$this->db->update('user_expedition_plantslist',$data);
-
-
- 		}//end of function
-
- 		function get_currUserPlantList($userid){
- 			$this->db->select('plantList');
-			$this->db->from('user_expedition_plantslist');
-			$this->db->where('userid',$userid);
-			//$this->db->join('herbologyMeetAnswers as b', 'a.qid = b.ans_qid','left');
-			//$this->db->join('user_table as c', 'b.userid = c.userid','left');
-			//$this->db->where('b.usertype','2');
-			//$this->db->limit(1);
-
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get expedition questions fxn
-
-
- 		function get_expedition_answers($expeditionId){
- 			//get all answers for the current expedition
- 			$this->db->select('answer');
-			$this->db->from('expeditionAnswers');
-			$this->db->where('ans_eid',$expeditionId);
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get expedition answers fxn
-
-
-
- 		function save_user_expedition_score($studentid,$expeditionId,$score){
-  			$data=array(
-	    		'score'=>$score,
-	    		'isDone'=>1
-				);
-			//$array = array('expeditionId' => $expeditionId, 'userid' => $studentid);
-
-
-  			//$this->db->set($);
-  			//$this->db->where($array);
-  			$this->db->where('userid',$studentid);
-  			$this->db->where('expeditionId',$expeditionId);
-  			//$this->db->where($data);
-  			$this->db->update('user_expedition_scores',$data);
-
- 		} //end of save score
-
- 		function get_currExpedition_isDone($userid,$expeditionId){
- 			//get all answers for the current expedition
- 			$this->db->select('isDone');
-			$this->db->from('user_expedition_scores');
-			$this->db->where('expeditionId',$expeditionId);
-			$this->db->where('userid',$userid);
-
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get expedition answers fxn
-
-    function get_currHerbmeet_isDone($userid){
-      //get if current user is done with herb meet
-      $this->db->select('score');
-      $this->db->from('herbmeet_scores');
-      $this->db->where('uid',$userid);
-
-
-      $query = $this->db->get();
-
-
-      return $query->result_array();
-    } //end of get expedition answers fxn
-
-
- 		function save_user_currExpedition_done($userid,$expeditionId){
- 			//get all answers for the current expedition
- 			$list=NULL;
- 			$this->db->set('plantList', $list);
-  			$this->db->where('userid',$userid);
-  			$this->db->where('expeditionId',$expeditionId);
-  			$this->db->update('user_expedition_plantslist');
- 		} //end of get expedition answers fxn
-
- 		function save_user_change_expeditionNo($userid){
- 			//get all answers for the current expedition
- 			$list=0;
- 			$this->db->set('currExpeditionId', $list);
-  			$this->db->where('userid',$userid);
-  			$this->db->update('user_expedition_completed');
- 		} //end of get expedition answers fxn
-
- 		function save_currExpeditionId($userid,$eid){
- 			//update expedition id in table user_expedition_completed
-  			$this->db->set('currExpeditionId', $eid);
-  			$this->db->where('userid',$userid);
-  			$this->db->update('user_expedition_completed');
- 			//return 1;
- 		}//end of function
-
- 		function save_currExpeditionId_plantslist($userid,$eid){
- 			//update expedition id in table user_expedition_completed
-  			$this->db->set('expeditionId', $eid);
-  			$this->db->where('userid',$userid);
-  			$this->db->update('user_expedition_plantslist');
- 			//return 1;
- 		}//end of function
-
- 		function get_herbmeet_scores($userid){
- 			//get the herbmeet score for the user
- 			$this->db->select('score');
-			$this->db->from('herbmeet_scores');
-			$this->db->where('uid',$userid);
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get herbmeet scores fxn
-
-    function get_rootquiz_scores($userid){
-      //get the root quiz score for the user
-      $this->db->select('score');
-      $this->db->from('rootquiz_scores');
-      $this->db->where('uid',$userid);
-
-      $query = $this->db->get();
-
-
-      return $query->result_array();
-    } //end of get herbmeet scores fxn
-
-    function get_stemquiz_scores($userid){
-      //get the root quiz score for the user
-      $this->db->select('score');
-      $this->db->from('stemquiz_scores');
-      $this->db->where('uid',$userid);
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herbmeet scores fxn
-
-    function get_leavesquiz_scores($userid){
-      //get the root quiz score for the user
-      $this->db->select('score');
-      $this->db->from('leavesquiz_scores');
-      $this->db->where('uid',$userid);
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herbmeet scores fxn
-
-    function get_reproquiz_scores($userid){
-      //get the root quiz score for the user
-      $this->db->select('score');
-      $this->db->from('reproquiz_scores');
-      $this->db->where('uid',$userid);
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herbmeet scores fxn
-
-    function get_diversityquiz_scores($userid){
-      //get the root quiz score for the user
-      $this->db->select('score');
-      $this->db->from('diversityquiz_scores');
-      $this->db->where('uid',$userid);
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herbmeet scores fxn
-
- 		function get_expedition_scores($userid){
- 			//get the herbmeet score for the user
- 			$this->db->select('expeditionId,score');
-			$this->db->from('user_expedition_scores');
-			$this->db->where('userid',$userid);
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get herbmeet scores fxn
-
- 		function get_herbmeet_score_of_students(){
- 			//get the herbmeet score for the user
- 			$this->db->select('uid,score');
-			$this->db->from('herbmeet_scores');
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get herbmeet scores of all students from table fxn
-
-    function get_rootquiz_score_of_students(){
-      //get the herbmeet score for the user
-      $this->db->select('uid,score');
-      $this->db->from('rootquiz_scores');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herbmeet scores of all students from table fxn
-
-    function get_stemquiz_score_of_students(){
-      //get the herbmeet score for the user
-      $this->db->select('uid,score');
-      $this->db->from('stemquiz_scores');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herbmeet scores of all students from table fxn
-
-    function get_leavesquiz_score_of_students(){
-      //get the herbmeet score for the user
-      $this->db->select('uid,score');
-      $this->db->from('leavesquiz_scores');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herbmeet scores of all students from table fxn
-
-    function get_reproquiz_score_of_students(){
-      //get the herbmeet score for the user
-      $this->db->select('uid,score');
-      $this->db->from('reproquiz_scores');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herbmeet scores of all students from table fxn
-
-
-    function get_diversityquiz_score_of_students(){
-      //get the herbmeet score for the user
-      $this->db->select('uid,score');
-      $this->db->from('diversityquiz_scores');
-
-      $query = $this->db->get();
-
-      return $query->result_array();
-    } //end of get herbmeet scores of all students from table fxn
-
- 		function get_expedition_score_of_students(){
- 			//get the herbmeet score for the user
- 			$this->db->select('userid,expeditionId,score');
-			$this->db->from('user_expedition_scores');
-
-			$query = $this->db->get();
-
-
-			return $query->result_array();
- 		} //end of get expedition scores of all students from table fxn
-
-    function get_expedition_addpts_questions($expeditionId){
-      //get the herbmeet score for the user
-      $this->db->select('question,answer');
-      $this->db->from('expedition_add_points');
-      $this->db->where('expeditionId',$expeditionId);
-
-      $query = $this->db->get();
-
-
-      return $query->result_array();
-    } //end of get expedition n questions for additional pts
-
-    function get_expedition_currScore($userid,$expeditionId){
-      //get the herbmeet score for the user
-      $this->db->select('score');
-      $this->db->from('user_expedition_scores');
-      $this->db->where('expeditionId',$expeditionId);
-      $this->db->where('userid',$userid);
-
-      $query = $this->db->get();
-
-
-      return $query->result_array();
-    } //end of get expedition (current) total score
-
-    function save_user_expedition_addPts($studentid,$expeditionId,$score){
-        $data=array(
-          'score'=>$score,
-          'hasAddPoints'=>1
-        );
-      //$array = array('expeditionId' => $expeditionId, 'userid' => $studentid);
-
-
-        //$this->db->set($);
-        //$this->db->where($array);
-        $this->db->where('userid',$studentid);
-        $this->db->where('expeditionId',$expeditionId);
-        //$this->db->where($data);
-        $this->db->update('user_expedition_scores',$data);
-
-    } //end of save score
-
-    function get_currExpedition_hasAddPts($userid,$eid){
-      //get the herbmeet score for the user
-      $this->db->select('hasAddPoints');
-      $this->db->from('user_expedition_scores');
-      $this->db->where('expeditionId',$eid);
-      $this->db->where('userid',$userid);
-
-      $query = $this->db->get();
-
-
-      return $query->result_array();
-    } //end of get expedition (current) total score
+ 		
 
 	}
 

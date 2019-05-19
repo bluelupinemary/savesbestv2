@@ -43,7 +43,7 @@
               Notifications:
               <?php  
               echo "<br><span style='color:maroon;font-size:1.1em;'>BILLS NOT IN COLLECTION: </span>"."<a href='".site_url('home/queryBillsToView')."' style='font-weight:bold;'>".$bills_not_paid_count['cnt']."</a>";
-              echo "<br><span style='color:maroon;font-size:1.1em;'>WITH PARTIAL PAYMENTS: </span>"."<a href='".site_url('home/viewCollectionNotPaid')."' style='font-weight:bold;'>".$payment_not_full['cnt']."</a>";
+            //  echo "<br><span style='color:maroon;font-size:1.1em;'>WITH PARTIAL PAYMENTS: </span>"."<a href='".site_url('home/viewCollectionNotPaid')."' style='font-weight:bold;'>".$payment_not_full['cnt']."</a>";
       
 
               ?>
