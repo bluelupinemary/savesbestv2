@@ -601,10 +601,32 @@ function showImportedBillings(){
                 }else{
                     $resultdata['ok'] = false;
                 }
-
+                $temp_id = $this->user->get_id_of_consumer($account_no);
+                //echo "<br><br>";
+                //print_r($temp_id);
+                if(count($temp_id) >0 ) $consumer_id = $temp_id[0]['id'];
+                else $consumer_id = 0;
+               // echo "consumer id: "+$consumer_id; 
+                $resultdata['consumer_id']  = $consumer_id;
 
                 //$resultdata['receipt_results'] = $this->user->get_receipt_per_consumer_account($month, $year, $bill_id);
+                $elec_bal = $this->user->get_elec_bal_per_consumer_account($consumer_id,$year);
+                $water_bal = $this->user->get_water_bal_per_consumer_account($consumer_id,$year);
+                $garbage_bal = $this->user->get_garbage_bal_per_consumer_account($consumer_id,$year);
                 $resultdata['receipt_results'] = $this->user->get_receipt_per_consumer_account($bill_id);
+                
+                $c1 = count($elec_bal);
+                $c2 = count($water_bal);
+                $c3 = count($garbage_bal);
+                if($c1 != 0) $resultdata['elec_bal'] = $elec_bal[0]['balance_amount'];
+                else $resultdata['elec_bal'] = 0;
+
+                if($c2 != 0) $resultdata['water_bal'] = $water_bal[0]['balance_amount'];
+                else $resultdata['water_bal'] = 0;
+                
+                if($c3 != 0)   $resultdata['garbage_bal'] = $garbage_bal[0]['balance_amount'];
+                else $resultdata['garbage_bal'] = 0;
+              
                  
 
              //   echo "<br><br>ok ".$bill_id;
@@ -882,6 +904,7 @@ function showImportedBillings(){
                     $data['usertype'] = $session_data['usertype']; 
 
                      $account_no = $this->input->post('account_no');
+                     $consumer_id = $this->input->post('consumer_id');
                      $month = $this->input->post('payment_month');
                      $year = $this->input->post('payment_year');
                      $bill_id = $this->input->post('bill_id');
@@ -901,6 +924,12 @@ function showImportedBillings(){
                      $g_receiptNo = $this->input->post('garbage_receipt_no');
                      $g_receiptDate = $this->input->post('garbage_receipt_date');
 
+                     $elec_bal = $this->input->post('electric_balance');
+                     $water_bal = $this->input->post('water_balance');
+                     $garbage_bal = $this->input->post('garbage_balance');
+
+                     $consumer_id = $this->input->post('consumer_id');
+
                      if($surcharge==NULL || $surcharge == ""){
                         $surcharge = 0;
                      }
@@ -917,7 +946,7 @@ function showImportedBillings(){
                 if($bill_id==NULL || $bill_id==""){
 
                 }else{     
-                   $this->user->update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$surcharge,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_updated,$updated_by);
+                   $this->user->update_payment_of_consumer_in_collection($consumer_id,$year, $bill_id,$electricity,$water,$garbage,$surcharge,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_updated,$updated_by,$elec_bal,$water_bal,$garbage_bal);
                 }
                    //$resultdata['results'] = $this->user->get_collections_for_edit($bill_id);
                   //$resultdata['results'] =  $resultdata['username'] = $data['username'];
@@ -925,6 +954,11 @@ function showImportedBillings(){
                 $resultdata['account_no'] = $account_no;
                 $resultdata['payment_month'] = $month;
                 $resultdata['payment_year'] = $year;
+                $resultdata['elec_bal'] = $elec_bal;
+                $resultdata['water_bal'] = $water_bal;
+                $resultdata['garbage_bal'] = $garbage_bal;
+                $resultdata['consumer_id'] = $consumer_id;
+              
 
                 $count = count($resultdata['results']);
                // echo "<br><br>COUNT: ".$count;

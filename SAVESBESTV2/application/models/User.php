@@ -614,6 +614,22 @@
 
  		} //end of get consumers
 
+ 		function get_elec_bal_per_consumer_account($consumer_id,$year){
+			$query = $this->db->query("select balance_amount from consumer_electric_balance where consumer_id=".$consumer_id." and balance_year=".$year);
+			return $query->result_array();
+ 		} //end of get consumers
+
+ 		function get_water_bal_per_consumer_account($consumer_id,$year){
+			$query = $this->db->query("select balance_amount from consumer_water_balance where consumer_id=".$consumer_id." and balance_year=".$year);
+			return $query->result_array();
+ 		} //end of get consumers
+
+ 		function get_garbage_bal_per_consumer_account($consumer_id,$year){
+			$query = $this->db->query("select balance_amount from consumer_garbage_balance where consumer_id=".$consumer_id." and balance_year=".$year);
+			return $query->result_array();
+ 		} //end of get consumers
+
+
  		function get_consumer_statement_of_account($consumer_id,$year){
 			$query = $this->db->query("select a.consumer_id,a.electricity_reading, a.water_reading, a.garbage_fee, a.bill_month, a.id as bill_id, b.* from consumer_bill a join consumer_collection b on a.id=b.bill_id where a.bill_year=".$year." and a.consumer_id=".$consumer_id." order by a.bill_month");
 			
@@ -621,6 +637,11 @@
 			return $query->result_array();
 
 
+ 		} //end of get consumers
+
+ 		function get_id_of_consumer($account_no){
+			$query = $this->db->query("select id from consumer where account_no=".$account_no);
+			return $query->result_array();
  		} //end of get consumers
 
  		function get_consumer_bill_ids($consumer_id,$year){
@@ -1027,7 +1048,7 @@
 
  		function get_collections_for_edit_by_account($account_no, $month, $year){
 	
-			$query = $this->db->query("select a.id,b.fullname as fullname,b.address,b.consumer_type,b.account_no, c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, a.bill_month, month(c.receipt_date) as payment_month, a.bill_year, year(c.receipt_date) as payment_year, c.surcharge,c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where b.account_no=".$account_no." and a.bill_month=".$month." and a.bill_year=".$year);
+			$query = $this->db->query("select a.id,b.id as consumer_id, b.fullname as fullname,b.address,b.consumer_type,b.account_no, c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, a.bill_month, month(c.receipt_date) as payment_month, a.bill_year, year(c.receipt_date) as payment_year, c.surcharge,c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where b.account_no=".$account_no." and a.bill_month=".$month." and a.bill_year=".$year);
 
 			return $query->result_array();
 
@@ -1270,7 +1291,7 @@
 	  	// 		}
   		// }
 
-  		function update_payment_of_consumer_in_collection($bill_id,$electricity,$water,$garbage,$surcharge,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_updated,$updated_by){
+  		function update_payment_of_consumer_in_collection($consumer_id,$bill_year,$bill_id,$electricity,$water,$garbage,$surcharge,$e_receiptNo,$e_receiptDate,$w_receiptNo,$w_receiptDate,$g_receiptNo,$g_receiptDate,$date_updated,$updated_by,$elec_bal,$water_bal,$garbage_bal){
 
   			$data=array(
 
@@ -1306,7 +1327,7 @@
 
   				
 
-	  			if($bill_elec==$temp_elec && $bill_water==$temp_water && $bill_garbage==$temp_garbage){
+	  			if($temp_elec >= $bill_elec && $temp_water >= $bill_water && $temp_garbage >= $bill_garbage){
 	  				$data=array(
 	    				'is_paid'=>1
 					);
@@ -1421,8 +1442,33 @@
 					
   				}
 
+  				if($elec_bal!=NULL || $elec_bal!=""){
+  					$data5=array(
+			    		'balance_amount'=>$elec_bal
+						);
+						$this->db->where('consumer_id',$consumer_id);
+						$this->db->where('balance_year',$bill_year);
+	  					$this->db->update('consumer_electric_balance',$data5);
+  				}
+  				if($water_bal!=NULL || $water_bal!=""){
+  					$data6=array(
+			    		'balance_amount'=>$water_bal
+						);
+						$this->db->where('consumer_id',$consumer_id);
+						$this->db->where('balance_year',$bill_year);
+	  					$this->db->update('consumer_water_balance',$data6);
+  				}
+  				if($garbage_bal!=NULL || $garbage_bal!=""){
+  					$data7=array(
+			    		'balance_amount'=>$garbage_bal
+						);
+						$this->db->where('consumer_id',$consumer_id);
+						$this->db->where('balance_year',$bill_year);
+	  					$this->db->update('consumer_garbage_balance',$data7);
+  				}
 
-	  		}
+
+	  		}//end of function
 
 	  	function get_monthly_collections_for_report_view($month, $year){
 			//echo "<br><br>ditooooooooo";
