@@ -27,13 +27,17 @@
       <img class="home-icon" src="<?php echo base_url();?>devtools/images/bill/home_icon.png" height="30px" width="30px"><b>&nbsp&nbspBack to Dashboard</b>
     </a>
     <!--END OF BACK TO DASHBOARD ICON-->
+    <br/> <br/>
+     <div style="margin-left:5%;">
+      <h4 style="color:darkgreen;"><b>Add Consumer Balance Page</b></h4>
+    </div>
     <div class="container">
         <!--div class="row-head row"-->
           <div>
 				  		 <?php
                   if(isset($ok)){
                       if($ok){
-                          echo "<br><span style='padding:10px;color:white;font-size:1.2em;background-color:green;'>SUCCESS: The balance was succesffully added to the consumer</span>";
+                          echo "<br><span style='padding:10px;color:maroon;font-size:1.2em;background-color:yellow;'>SUCCESS: The balance was succesfully added to the consumer</span>";
                       }else{
                           echo "<br><span style='padding:10px;color:maroon;font-size:1.2em;background-color:orange;'>WARNING: Unable to add balance. The consumer already has an existing balance for the set year.</span>";
                       }
@@ -44,7 +48,7 @@
               <br/><br/>
               <div class="col-lg-6">
                   <span class="search-box-title">Consumers </span>
-                  <input type="text" class="form-control" id="new-search-box" placeholder="Search consumer here...">
+                  <input type="text" class="form-control" id="new-search-box" placeholder="Search consumer here">
               </div><!-- /.col-lg-6 -->
 				  		<div class="panel-body">
                     <table id="myTable" class="table table-striped table-bordered table-hover" cellspacing="0" width="95%">
@@ -101,7 +105,7 @@
                                 
                                 echo form_open('Consumer/addYearBalance');
                                 echo "<input type='hidden' name='consumer_id' id='consumer_id' value=' ".$result['id']." ' />";
-                                echo "<button data-toggle='tooltip' title='Add Balance' type='submit' class='consumer-btn'><span class='glyphicon glyphicon-plus-sign'></span></button>";
+                                echo "<button data-toggle='tooltip' title='Add Year Balance' type='submit' class='consumer-btn'><span class='glyphicon glyphicon-plus-sign'></span></button>";
                                 //echo form_button($delete_button);
                                 "</form></div>";
                                 echo form_close();

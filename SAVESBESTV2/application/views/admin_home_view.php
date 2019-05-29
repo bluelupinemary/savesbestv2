@@ -136,12 +136,12 @@
                           <span class="text-content"><span>VIEW BILLINGS</span></span>
                         </a>
                     </li>
-                     <!--li>
+                     <li>
                          <a href="<?php echo site_url('home/viewConsumersForYearBalance') ?>">
                           <img src="<?php echo base_url();?>devtools/images/add_year_balance_icon.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>ADD YEAR BALANCE</span></span>
                         </a>
-                    </li-->
+                    </li>
                   </ul>
 
                   <!--  <p> <a class="btn btn-primary btn-lg col" name="register" role="button" href="<?php echo site_url('home/addTeacher') ?>">Add Teacher</a></p>-->

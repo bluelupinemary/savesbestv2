@@ -306,11 +306,17 @@ function insertBondDeposit(){
 
                 $consumer_id = $this->input->post('consumer_id');
                 $account_no = $this->input->post('account_no');
-                $amount = $this->input->post('balance_amount');
-                $year = $this->input->post('balance_year');
-                $val =  $this->user->add_year_balance_to_consumer($consumer_id, $amount,$year);
-                
-               // echo "<br><br> ".$amount." ".$year." c- ".$consumer_id." a- ".$account_no;
+                $elecBalance = $this->input->post('elec_balance');
+                $waterBalance = $this->input->post('water_balance');
+                $garbageBalance = $this->input->post('garbage_balance');
+                $year = $this->input->post('year_balance');
+
+
+                $val =  $this->user->add_year_balance_to_consumer($consumer_id, $elecBalance,$waterBalance,$garbageBalance,$year);
+               // $val=false;
+                //echo "<br><br> ".$elecBalance." ".$year." c- ".$consumer_id." a- ".$account_no;
+                //echo "<br><br> ".$waterBalance;
+               // echo "<br><br> ".$garbageBalance;
                 $resultdata['username'] = $data['username'];
                 
                 if($val){
@@ -709,8 +715,8 @@ function showImportedBillings(){
 
             $resultdata['results'] = $results;
             $bills_of_consumer = $this->user->get_consumer_bill_ids($consumer_id,$year);
-            //echo "<br><br>-";
-           // print_r($bills_of_consumer);
+            //echo "<br><br> Consumer: ".$consumer_id;
+            //print_r($bills_of_consumer);
             $count = count($resultdata['results']);
                 //echo "<br><br>COUNT: ".$count;
             $receipt_results = [];
@@ -1077,15 +1083,8 @@ function showImportedBillings(){
 
                         $bills_of_consumer = $this->user->get_consumer_bill_ids($consumer_id,$year);
 
-                        $bal_of_consumer = $this->user->get_consumer_balance($consumer_id,$year-1);
-                        //echo "<br><br>-";
-                       // print_r($bills_of_consumer);
-                       // print_r($var);
-                        $count = count($var);
-                        $hasBalance = count($bal_of_consumer);
-                            //echo "<br><br>COUNT: ".$hasBalance." bal: ".$balance[0]['balance_amount'];
-                            //print_r($balance);
                         $receipt_results = [];
+                         $count = count($var);
                         if($count > 0){
                                // $resultdata['ok'] = true;
                             foreach ($bills_of_consumer as $bill) {
@@ -1093,13 +1092,61 @@ function showImportedBillings(){
                                 array_push($receipt_results,$temp);
                             }
                         }
-                        $balance = 0;
-                        if($hasBalance > 0 ){
-                            $balance = $bal_of_consumer[0]['balance_amount'];
+
+                        $balance_elec_prev_year = $this->user->get_electric_balance($consumer_id,$year-1);
+                        $balance_water_prev_year = $this->user->get_water_balance($consumer_id,$year-1);
+                        $balance_garbage_prev_year = $this->user->get_garbage_balance($consumer_id,$year-1);
+                       
+                        $count = count($var);
+                        $hasElecBalance_prev = count($balance_elec_prev_year);
+                        $hasWaterBalance_prev = count($balance_water_prev_year);
+                        $hasGarbageBalance_prev = count($balance_garbage_prev_year);
+
+
+                        $balance_elec_curr_year = $this->user->get_electric_balance($consumer_id,$year);
+                        $balance_water_curr_year = $this->user->get_water_balance($consumer_id,$year);
+                        $balance_garbage_curr_year = $this->user->get_garbage_balance($consumer_id,$year);
+                       
+                       
+                        $hasElecBalance_curr = count($balance_elec_curr_year);
+                        $hasWaterBalance_curr = count($balance_water_curr_year);
+                        $hasGarbageBalance_curr = count($balance_garbage_curr_year);
+                        
+                            //print_r($balance);
+                        
+                        $elec_balance_prev = 0;
+                        $water_balance_prev = 0;
+                        $garbage_balance_prev = 0;
+                        if($hasElecBalance_prev > 0 ){
+                            $elec_balance_prev = $balance_elec_prev_year[0]['balance_amount'];
+                        }
+
+                        if($hasWaterBalance_prev > 0 ){
+                            $water_balance_prev = $balance_water_prev_year[0]['balance_amount'];
+                        }
+
+                        if($hasGarbageBalance_prev > 0 ){
+                           $garbage_balance_prev = $balance_garbage_prev_year[0]['balance_amount'];
+                        }
+
+
+                        $elec_balance_curr = 0;
+                        $water_balance_curr = 0;
+                        $garbage_balance_curr = 0;
+                        if($hasElecBalance_curr > 0 ){
+                            $elec_balance_curr = $balance_elec_curr_year[0]['balance_amount'];
+                        }
+
+                        if($hasWaterBalance_curr > 0 ){
+                            $water_balance_curr = $balance_water_curr_year[0]['balance_amount'];
+                        }
+
+                        if($hasGarbageBalance_curr > 0 ){
+                           $garbage_balance_curr = $balance_garbage_curr_year[0]['balance_amount'];
                         }
                              
                         //print_r($receipt_results);
-                       // echo "<br><br>>>>>>";
+                        //echo "<br><br>>>>>> ".$elec_balance." ".$water_balance." ".$garbage_balance ;
                         
                         $results = $this->user->get_yearly_collections_for_report_view($year,$account_no);
                         //print_r($results);
@@ -1184,7 +1231,7 @@ function showImportedBillings(){
                             //less than 12 (12 months)
                             for($i=0;$i<=16;$i++){
                                 if($i==0){
-                                    $pdf->Row(array("BAL  ".($year-1),$balance,"","","","","","","","",""));
+                                    $pdf->Row(array("BAL  ".($year-1),$elec_balance_prev,"","",$water_balance_prev,"","",$garbage_balance_prev,"","",""));
                                 }if($i==1){
                                     $pdf->Row(array("JAN",getElectricBill($i,$results),getElectricPaid($i,$results),getORNumber_util($i,$results,$receipt_results,1),getWaterBill($i,$results),getWaterPaid($i,$results),getORNumber_util($i,$results,$receipt_results,2),getGarbageBill($i,$results),getGarbagePaid($i,$results),getORNumber_util($i,$results,$receipt_results,3),getSurcharge($i,$results)));
                                 }if($i==2){
@@ -1212,9 +1259,9 @@ function showImportedBillings(){
                                 }if($i==14){
                                     $pdf->Row(array("TOTAL",getTotalElectricBill($results),getTotalElectricPaid($results),"",getTotalWaterBill($results),getTotalWaterPaid($results),"",getTotalGarbageBill($results),getTotalGarbagePaid($results),"",""));
                                 }if($i==15){
-                                    $pdf->Row(array("BAL",getElectricBalance($results),"","",getWaterBalance($results),"","",getGarbageBalance($results),"","",""));
+                                    $pdf->Row(array("BAL",$elec_balance_curr,"","",$water_balance_curr,"","",$garbage_balance_curr,"","",""));
                                 }if($i==16){
-                                    $pdf->Row(array("BAL ".$year,getYearBalance($results),"","","","","","","","",""));
+                                    $pdf->Row(array("BAL ".$year,getYearBalance($elec_balance_curr,$water_balance_curr,$garbage_balance_curr),"","","","","","","","",""));
                                 }
                             }
 
@@ -1504,16 +1551,19 @@ function getORNumber($month,$results){
 }
 
 function getORNumber_util($month,$results,$receipts,$type){
-    for($i=0;$i<count($results);$i++){
-        $temp = intval($results[$i]['bill_month']);
-        if($temp==intval($month)){
-            //return $results[$i]['receipt_number'];
-            foreach($receipts[$i] as $receipt){
-                    if($receipt['bill_id']==$results[$i]['id'] && $receipt['utility_type']==$type){
-                        $newDate = date("m/d/y", strtotime($receipt['receipt_date']));
-                        return $receipt['receipt_no']." - ".$newDate;
-                        break;
-                    }
+    $count = count($results);
+    if($count > 0){
+        for($i=0;$i<$count;$i++){
+            $temp = intval($results[$i]['bill_month']);
+            if($temp==intval($month)){
+                //return $results[$i]['receipt_number'];
+                foreach($receipts[$i] as $receipt){
+                        if($receipt['bill_id']==$results[$i]['id'] && $receipt['utility_type']==$type){
+                            $newDate = date("m/d/y", strtotime($receipt['receipt_date']));
+                            return $receipt['receipt_no']." - ".$newDate;
+                            break;
+                        }
+                }
             }
         }
     }
@@ -1629,8 +1679,8 @@ function getGarbageBalance($results){
     return number_format($balance, 2, '.', '');
 }
 
-function getYearBalance($results){
-    $balance = getElectricBalance($results) + getWaterBalance($results) + getGarbageBalance($results);
+function getYearBalance($elec_balance_curr,$water_balance_curr,$garbage_balance_curr){
+    $balance = $elec_balance_curr + $water_balance_curr + $garbage_balance_curr;
     return number_format($balance, 2, '.', '');
 }
 ?>

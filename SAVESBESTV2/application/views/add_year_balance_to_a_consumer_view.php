@@ -110,20 +110,32 @@
                                           <label for="pipeSize">Pipe Size:</label> TO FOLLOW
                                     </p>
                                     <p>
-                                       <label for="balanceAmount">Balance:</label>
-                                         
-                                       </div>
-                                       <div class="input-group">
+                                       <label for="elec_balance">Electric Balance:</label>
                                              <?php 
-                                            echo '<input type="number" class="form-control" required placeholder="Enter balance here" id="balance_amount" size="5" name="balance_amount" onkeyup="this.value=this.value.replace(/[^\d]/,\'\')" value=""/>';
-                                            echo '<span class="input-group-addon">-</span>';
-                                            echo '<select name="balance_year" id="balance_year" class="form-control">';
-                                             for($i = 2017 ; $i < date('Y'); $i++){
+                                            echo '<input type="text" required placeholder="Enter balance here" id="elec_balance" size="15" name="elec_balance" onkeyup="this.value=this.value.replace(/[^0-9.-]/,\'\')" value=""/>';
+                                            //echo '<span class="input-group-addon">-</span>';
+                                            ?>
+                                            <br/>
+                                      <label for="water_balance">Water Balance:</label>
+                                            <?php
+                                            echo '<input type="text" required placeholder="Enter balance here" id="water_balance" size="15" name="water_balance" onkeyup="this.value=this.value.replace(/[^0-9.-]/,\'\')" value=""/>';
+
+                                      ?>
+                                      <br/>
+                                      <label for="garbage_balance">Garbage Balance:</label>
+                                            <?php
+                                            echo '<input type="text" required placeholder="Enter balance here" id="garbage_balance" size="15" name="garbage_balance" onkeyup="this.value=this.value.replace(/[^0-9.-]/,\'\')" value=""/>';
+                                            ?>
+                                      <br/>
+                                      <label for="year_balance">Year Balance:</label>
+                                            <?php
+                                            echo '<select name="year_balance" id="year_balance">';
+                                             for($i = 2016 ; $i < date('Y'); $i++){
                                                 echo "<option>".$i."</option>";
                                              }
                                             echo "</select>";
                                           ?>
-                                        </div>
+                                        
                                     </p>
                                       <input type="hidden" id="consumer_id" name="consumer_id" value="<?php echo $data['id'] ?>"/>
                                       <input type="hidden" id="account_no" name="account_no" value="<?php echo $data['account_no'] ?>"/>

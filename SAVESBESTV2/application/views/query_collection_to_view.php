@@ -294,8 +294,16 @@ function focusElecBal() {
 
 function changeElecBal(newElecVal){
   var elec_bal = document.getElementById("electric_balance").value;
-  var diff = parseFloat(mod_elec_amt).toFixed(2) - parseFloat(newElecVal).toFixed(2);
-  elec_bal = parseFloat(elec_bal) + parseFloat(diff.toFixed(2));
+  
+  if(elec_bal < 0){	//if underpayment (negative balance)
+	  var diff = parseFloat(mod_elec_amt).toFixed(2) - parseFloat(newElecVal).toFixed(2);
+	  elec_bal = parseFloat(elec_bal) - parseFloat(diff.toFixed(2));
+	  //console.log("diff: "+diff+" elec bal: "+elec_bal);
+  }else{		//else if overpayment (positive balance)
+	var diff = parseFloat(mod_elec_amt).toFixed(2) - parseFloat(newElecVal).toFixed(2);
+	  elec_bal = parseFloat(elec_bal) - parseFloat(diff.toFixed(2));
+	  //console.log("2 diff: "+diff+" elec bal: "+elec_bal);
+  }
   document.getElementById('electric_balance').value = elec_bal.toFixed(2);
 }
 
@@ -310,8 +318,16 @@ function focusWaterBal() {
 
 function changeWaterBal(newWaterVal){
   var water_bal = document.getElementById("water_balance").value;
-  var diff = parseFloat(mod_water_amt).toFixed(2) - parseFloat(newWaterVal).toFixed(2);
-  water_bal = parseFloat(water_bal) + parseFloat(diff.toFixed(2));
+
+ if(water_bal < 0){	//if underpayment (negative balance)
+	  var diff = parseFloat(mod_water_amt).toFixed(2) - parseFloat(newWaterVal).toFixed(2);
+	  water_bal = parseFloat(water_bal) - parseFloat(diff.toFixed(2));
+	  //console.log("diff: "+diff+" elec bal: "+elec_bal);
+  }else{		//else if overpayment (positive balance)
+	 var diff = parseFloat(mod_water_amt).toFixed(2) - parseFloat(newWaterVal).toFixed(2);
+  	water_bal = parseFloat(water_bal) - parseFloat(diff.toFixed(2));
+  }
+  
   document.getElementById('water_balance').value = water_bal.toFixed(2);
 }
 
@@ -327,8 +343,15 @@ function focusGarbageBal() {
 
 function changeGarbageBal(newGarbageVal){
   var garbage_bal = document.getElementById("garbage_balance").value;
-  var diff = parseFloat(mod_garbage_amt).toFixed(2) - parseFloat(newGarbageVal).toFixed(2);
-  garbage_bal = parseFloat(garbage_bal) + parseFloat(diff.toFixed(2));
+  if(garbage_bal < 0){	//if underpayment (negative balance)
+	  var diff = parseFloat(mod_garbage_amt).toFixed(2) - parseFloat(newGarbageVal).toFixed(2);
+  	  garbage_bal = parseFloat(garbage_bal) - parseFloat(diff.toFixed(2));
+	  //console.log("diff: "+diff+" elec bal: "+elec_bal);
+  }else{		//else if overpayment (positive balance)
+	 var diff = parseFloat(mod_garbage_amt).toFixed(2) - parseFloat(newGarbageVal).toFixed(2);
+  	  garbage_bal = parseFloat(garbage_bal) - parseFloat(diff.toFixed(2));
+  }
+ 
   document.getElementById('garbage_balance').value = garbage_bal.toFixed(2);
 }
 
