@@ -782,6 +782,44 @@ function showImportedBillings(){
            }
     }
 
+     function findBillsNotPaidByMonthYear(){
+        
+         if($this->session->userdata('logged_in')){
+             $session_data = $this->session->userdata('logged_in');
+             $data['username'] = $session_data['username'];
+             $data['userid'] = $session_data['userid'];
+             $data['usertype'] = $session_data['usertype'];
+                $temp_month = $this->input->post('month');
+                $temp_year = $this->input->post('year');
+                $month = intval($temp_month);
+                $year = intval($temp_year);
+
+               // echo "<br><br><br><br><br><br><br> >>>>>.".$month.">>>".$year;
+                $resultdata['username'] = $data['username'];
+                $resultdata['bill_year'] = $year;
+                $resultdata['bill_month'] = $month;
+                $resultdata['results'] = $this->user->get_consumer_billings_not_paid_by_month_year($month,$year);
+                $count = count($resultdata['results']);
+                //echo "<br><br>COUNT: ".$count;
+               // print_r($resultdata['results']);
+                if($count > 0){
+                    $resultdata['ok'] = true;
+                }else{
+                    $resultdata['ok'] = false;
+                }
+                 
+
+              //  echo "ok ".$resultdata['ok'];
+        //        $resultdata[''] = $this->user->get_sections_handled($data['userid']);
+        //        $resultdata['username']=$data['username'];
+
+                $this->load->view('template/header_template_view');
+                $this->load->view('query_bills_not_paid_view',$resultdata);
+           }else{
+               redirect('login','refresh');
+           }
+    }
+
     function viewImportedBillsByMonthYear(){
         
          if($this->session->userdata('logged_in')){
@@ -855,7 +893,7 @@ function showImportedBillings(){
            }
     }
 
-    function findCollectionsForCollectionReport(){
+    function findCollectionsByYear(){
         
          if($this->session->userdata('logged_in')){
              $session_data = $this->session->userdata('logged_in');
@@ -863,22 +901,19 @@ function showImportedBillings(){
              $data['userid'] = $session_data['userid'];
              $data['usertype'] = $session_data['usertype'];
                 
-            $temp_month = $this->input->post('month');
+           
             $temp_year = $this->input->post('year');
-            $temp_type = $this->input->post('reportType');
-            $month = intval($temp_month);
+
+            //$month = intval($temp_month);
             $year = intval($temp_year);
 
-            //echo "<br><br><br><br><br><br><br> >>>>>.".$month.">>>".$year;
-            if($temp_type=='byMonth'){//if by month
-                $resultdata['results'] = $this->user->get_monthly_collections_for_report_view($month,$year);
-            }else{  //byYear
-                $resultdata['results'] = $this->user->get_yearly_collections_for_report_view($year);
-            }
+            //echo "<br><br><br><br><br><br><br> >>>>> ".$year;
+           
+            $resultdata['results'] = $this->user->get_yearly_collections_for_report_view($year);
+            //print_r($resultdata['results']);
 
             $resultdata['username'] = $data['username'];
-            $resultdata['report_type'] = $temp_type;
-            $resultdata['report_month'] = $temp_month;
+           
             $resultdata['report_year'] = $temp_year;
             
             $count = count($resultdata['results']);
@@ -895,7 +930,7 @@ function showImportedBillings(){
         //        $resultdata['username']=$data['username'];
 
                 $this->load->view('template/header_template_view');
-                $this->load->view('query_collection_report_to_view',$resultdata);
+                $this->load->view('query_collection_for_yearly_report_view',$resultdata);
            }else{
                redirect('login','refresh');
            }

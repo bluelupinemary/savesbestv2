@@ -349,7 +349,7 @@ Class accessed if user has successfully logged in
 				}
 		}//end of listConsumer
 
-		function viewCollectionNotPaid(){
+		function viewBillsNotPaid(){
 						//list users
 				if($this->session->userdata('logged_in')){
 						$session_data = $this->session->userdata('logged_in');
@@ -364,7 +364,7 @@ Class accessed if user has successfully logged in
 						$resultdata['username']=$data['username'];
 
 						$this->load->view('template/header_template_view');
-						$this->load->view('list_collection_not_paid_view',$resultdata);
+						$this->load->view('query_bills_not_paid_view',$resultdata);
 
 				}else{
 						redirect('login','refresh');
@@ -518,6 +518,31 @@ Class accessed if user has successfully logged in
 
 						$this->load->view('template/header_template_view');
 						$this->load->view('query_statement_account_to_view',$resultdata);
+						//$this->load->view('sample_pdf_view',$resultdata);
+
+				}else{
+						redirect('login','refresh');
+				}
+		}//end of viewReadingsForCollection function
+
+			function viewYearlyCollection(){
+						//open page to query month and year of collection to be viewed
+				if($this->session->userdata('logged_in')){
+						$session_data = $this->session->userdata('logged_in');
+						$data['username'] = $session_data['username'];
+						$data['userid'] = $session_data['userid'];
+						$data['usertype'] = $session_data['usertype'];
+
+						
+
+						//access User.php model to get_consumers from the database
+						//$resultdata['results'] = $this->user->get_consumer_billings_for_collection();
+						$resultdata['results'] = $this->user->get_consumers();
+
+						$resultdata['username']=$data['username'];
+
+						$this->load->view('template/header_template_view');
+						$this->load->view('query_collection_for_yearly_report_view',$resultdata);
 						//$this->load->view('sample_pdf_view',$resultdata);
 
 				}else{

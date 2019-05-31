@@ -43,7 +43,7 @@
               Notifications:
               <?php  
               echo "<br><span style='color:maroon;font-size:1.1em;'>BILLS NOT IN COLLECTION: </span>"."<a href='".site_url('home/queryBillsToView')."' style='font-weight:bold;'>".$bills_not_paid_count['cnt']."</a>";
-            //  echo "<br><span style='color:maroon;font-size:1.1em;'>WITH PARTIAL PAYMENTS: </span>"."<a href='".site_url('home/viewCollectionNotPaid')."' style='font-weight:bold;'>".$payment_not_full['cnt']."</a>";
+              echo "<br><span style='color:maroon;font-size:1.1em;'>CONSUMERS NOT PAID / WITH PARTIAL PAYMENTS: </span>"."<a href='".site_url('home/viewBillsNotPaid')."' style='font-weight:bold;'>".$payment_not_full['cnt']."</a>";
       
 
               ?>
@@ -215,17 +215,18 @@
                     <ul class="img-list">
                     <li>
                         <a href="<?php echo site_url('home/viewStatementOfAccount') ?>">
-                          <img src="<?php echo base_url();?>devtools/images/statement_of_accounts.png" width="100px" height="100px" alt="image goes here"></img>
+                          <img src="<?php echo base_url();?>devtools/images/soa_icon.png" width="100px" height="80px" alt="image goes here" style="border:1px solid #d3d3d3;"></img>
                           <span class="text-content"><span>VIEW STATEMENT OF ACCOUNT</span></span>
                         </a>
                     </li>
-                    <!--li>
-                        <a href="<?php echo site_url('home/editConsumer') ?>">
-                          <img src="<?php echo base_url();?>devtools/images/reports.png" width="100px" height="100px" alt="image goes here"></img>
-                          <span class="text-content"><span>VIEW REPORTS</span></span>
+                    <br/>
+                    <li>
+                        <a href="<?php echo site_url('home/viewYearlyCollection') ?>">
+                          <img src="<?php echo base_url();?>devtools/images/collection_report_icon.png" width="100px" height="80px" alt="image goes here" style="border:1px solid #d3d3d3;"></img>
+                          <span class="text-content"><span>VIEW YEARLY COLLECTION</span></span>
                         </a>
                     </li>
-                     <li>
+                     <!--li>
                         <a href="<?php echo site_url('home/editConsumer') ?>">
                           <img src="<?php echo base_url();?>devtools/images/bill_summary.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>VIEW BILL SUMMARY</span></span>
