@@ -63,7 +63,7 @@
 
              
               
-             echo form_open('Consumer/addPaymentToCollection');
+             echo form_open('Consumer/createYearlyCollectionReportPDF');
 
               echo ' <div style="font-size:0.8em; padding-left:10%;padding-right:10%;">
                        <table id="" class="table table-striped table-bordered" cellspacing="0" width="100%" >
@@ -75,6 +75,7 @@
                                <th style="text-align:center;"  >Electricity Amount <br> Collected</th>
                                <th style="text-align:center;"  >Water Amount <br> Collected</th>
                                <th style="text-align:center;"  >Garbage Amount <br> Collected</th>
+                               <th style="text-align:center;"  >Monthly Total <br> Collected</th>
                                
 
                            </tr>
@@ -124,7 +125,8 @@
                                
                                 //$electricityTotalPerYear = number_format($electricityTotalPerYear,2);
                                 $waterTotalPerYear = floatval($waterTotalPerYear) + $result['water_total'];
-                                $garbageTotalPerYear = floatval($garbageTotalPerYear) + + $result['garbage_total'];
+                                $garbageTotalPerYear = floatval($garbageTotalPerYear) + $result['garbage_total'];
+                                $totalCollectionPerMonth = $result['elec_total'] + $result['water_total'] + $result['garbage_total'];
                                  // $consumer_array = array();
                                   echo "<tr style='text-align:right;font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;'>".
 
@@ -132,6 +134,7 @@
                                            "<td>".$totalElecPerMonth."</td>".
                                            "<td>".$totalWaterPerMonth."</td>".
                                            "<td>".$totalGarbagePerMonth."</td>".
+                                           "<td>".number_format($totalCollectionPerMonth,2)."</td>".
                                           
 
                                             "</tr>";
@@ -140,28 +143,20 @@
 
                                    }//end of foreach
                              echo "<tr style='text-align:right;font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;'>
-                                    <td style='text-align:right;font-weight:bold;'> SUB TOTAL: </td>
+                                    <td style='text-align:right;font-weight:bold;'> TOTAL: </td>
                                     <td style='text-align:right;font-weight:bold;'>".number_format($electricityTotalPerYear,2)."</td>
                                     <td style='text-align:right;font-weight:bold;'>".number_format($waterTotalPerYear,2)."</td>
                                     <td style='text-align:right;font-weight:bold;'>".number_format($garbageTotalPerYear,2)."</td>
+                                     <td style='text-align:right;font-weight:bold;'>".number_format(($electricityTotalPerYear + $waterTotalPerYear + $garbageTotalPerYear),2)."</td>
                                     
                                   </tr>" ;
                                      
-                             echo "<tr style='text-align:right;font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;'>
-                                    <td style='text-align:right;font-weight:bold;'> TOTAL: </td>
-                                    <td style='text-align:right;font-weight:bold;'>".number_format(($electricityTotalPerYear + $waterTotalPerYear + $garbageTotalPerYear),2)."</td>
-                                    <td></td>
-                                    <td></td>
-                                    
-                                  </tr>" ;
+                            
                              echo "</tbody>";
                              echo " </table>";
 
                           echo "</div><!--end of datatable div-->";
-                          if(isset($added_to_db) && $added_to_db){
-
-                           // echo "<span style='background-color:yellow;color:maroon;'>Payment was successfully added to the collection. </span>";
-                          }
+                         
                            echo "<button style='float:right;' data-toggle='tooltip' title='SAVE PAYMENT' type='submit' class='btn btn-warning'>PRINT REPORT</button>";
                            echo "<br><br>";
                            echo '<input type="hidden" id="year" name="year" value="'.$report_year.'"/>';

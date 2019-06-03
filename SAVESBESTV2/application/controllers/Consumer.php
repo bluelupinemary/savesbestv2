@@ -1335,6 +1335,258 @@ function showImportedBillings(){
 
 
 
+        function createYearlyCollectionReportPDF(){
+                        //open page to query month and year of collection to be viewed
+                if($this->session->userdata('logged_in')){
+                        $session_data = $this->session->userdata('logged_in');
+                        $data['username'] = $session_data['username'];
+                        $data['userid'] = $session_data['userid'];
+                        $data['usertype'] = $session_data['usertype'];
+
+                      
+                        $temp_year = $this->input->post('year');
+                        //$temp_account_no = $this->input->post('account_no');
+                        //$temp_consumer_id = $this->input->post('consumer_id');
+                        $resultdata['username']=$data['username'];
+
+                       // $account_no = intval($temp_account_no);
+                      //  $consumer_id = intval($temp_consumer_id);
+                        $year = intval($temp_year);
+
+                        $results = $this->user->get_yearly_collections_for_report_view($year);
+                        //print_r($resultdata['results']);
+
+                       
+                        $resultdata['report_year'] = $year;
+                        
+                        $count = count($results);
+                           // echo "<br><br>COUNT: ".$count;
+                        if($count > 0){
+                                $resultdata['ok'] = true;
+                        }else{
+                                $resultdata['ok'] = false;
+                        }
+
+                        //echo "<br><br><br><br><br><br><br> >>>>>.".$consumer_id;
+
+                        /*
+                        $var = $this->user->get_consumer_statement_of_account($consumer_id,$year);
+
+                        $bills_of_consumer = $this->user->get_consumer_bill_ids($consumer_id,$year);
+
+                        $receipt_results = [];
+                         $count = count($var);
+                        if($count > 0){
+                               // $resultdata['ok'] = true;
+                            foreach ($bills_of_consumer as $bill) {
+                                $temp = $this->user->get_receipt_per_consumer_account($bill['id']);
+                                array_push($receipt_results,$temp);
+                            }
+                        }
+
+                        $balance_elec_prev_year = $this->user->get_electric_balance($consumer_id,$year-1);
+                        $balance_water_prev_year = $this->user->get_water_balance($consumer_id,$year-1);
+                        $balance_garbage_prev_year = $this->user->get_garbage_balance($consumer_id,$year-1);
+                       
+                        $count = count($var);
+                        $hasElecBalance_prev = count($balance_elec_prev_year);
+                        $hasWaterBalance_prev = count($balance_water_prev_year);
+                        $hasGarbageBalance_prev = count($balance_garbage_prev_year);
+
+
+                        $balance_elec_curr_year = $this->user->get_electric_balance($consumer_id,$year);
+                        $balance_water_curr_year = $this->user->get_water_balance($consumer_id,$year);
+                        $balance_garbage_curr_year = $this->user->get_garbage_balance($consumer_id,$year);
+                       
+                       
+                        $hasElecBalance_curr = count($balance_elec_curr_year);
+                        $hasWaterBalance_curr = count($balance_water_curr_year);
+                        $hasGarbageBalance_curr = count($balance_garbage_curr_year);
+                        
+                            //print_r($balance);
+                        
+                        $elec_balance_prev = 0;
+                        $water_balance_prev = 0;
+                        $garbage_balance_prev = 0;
+                        if($hasElecBalance_prev > 0 ){
+                            $elec_balance_prev = $balance_elec_prev_year[0]['balance_amount'];
+                        }
+
+                        if($hasWaterBalance_prev > 0 ){
+                            $water_balance_prev = $balance_water_prev_year[0]['balance_amount'];
+                        }
+
+                        if($hasGarbageBalance_prev > 0 ){
+                           $garbage_balance_prev = $balance_garbage_prev_year[0]['balance_amount'];
+                        }
+
+
+                        $elec_balance_curr = 0;
+                        $water_balance_curr = 0;
+                        $garbage_balance_curr = 0;
+                        if($hasElecBalance_curr > 0 ){
+                            $elec_balance_curr = $balance_elec_curr_year[0]['balance_amount'];
+                        }
+
+                        if($hasWaterBalance_curr > 0 ){
+                            $water_balance_curr = $balance_water_curr_year[0]['balance_amount'];
+                        }
+
+                        if($hasGarbageBalance_curr > 0 ){
+                           $garbage_balance_curr = $balance_garbage_curr_year[0]['balance_amount'];
+                        }
+                             
+                        //print_r($receipt_results);
+                        //echo "<br><br>>>>>> ".$elec_balance." ".$water_balance." ".$garbage_balance ;
+                        
+                        $results = $this->user->get_yearly_collections_for_report_view($year,$account_no);
+                        //print_r($results);
+                        //echo "<br><br>>>>>>";
+                        
+                        */
+                        //print_r($results);
+                        if($results!=null){
+                            $pdf=new PDF_MC_Table();
+                            $pdf->AddPage('L','A4',0);
+                            $pdf->SetFont('Arial','',10);
+                            //Table with 20 rows and 4 columns
+                            $pdf->SetWidths(array(25,60,60,60,60));
+
+                             $pdf->Image('/var/www/html/SAVESBESTV2/devtools/images/bill/uplb.png',10,10,20,18);
+                            
+                            //$pdf->Image('/var/www/html/SAVESBESTV2/devtools/images/bill/logo-trans.png',35,10,-300);
+                            //filler; add new line
+                            $pdf->Cell(40,5,'',0,1,'L');
+                             
+                             //SAVESBEST HEADER
+                            $pdf->Cell(30,5,'',0,0,'L');
+                            $pdf->SetTextColor(13, 103, 133);
+                            $pdf->SetFont('Arial','B',14);
+                            $pdf->Cell(70,5,'RGDO-OVCPD Utilities Billing Section',0,1,'L');
+                            //$pdf->Cell(40,5,'',0,1,'L');
+                            $pdf->Cell(30,5,'',0,0,'L');
+                            $pdf->Cell(70,5,'Yearly Collection Report for '.$year,0,1,'L');
+
+                            $pdf->SetTextColor(0,0,0);
+                            $pdf->SetFont('Arial','',12);
+
+                             //filler; add new line
+                            $pdf->Cell(0,5,'',0,1,'L');
+                             //filler; add new line
+                            $pdf->Cell(0,5,'',0,1,'L');
+                            //set the table header
+                            $pdf->SetFont('Arial','B',10);
+                            //filler; add new line
+                            $pdf->Cell(0,5,'',0,1,'L');
+                            //table headers
+                            $pdf->Cell(25,10,'MONTH ',1,0,'C');
+                            $pdf->Cell(60,10,'ELECTRICITY AMT COLLECTED',1,0,'C');
+                            $pdf->Cell(60,10,'WATER AMT COLLECTED ',1,0,'C');
+                            $pdf->Cell(60,10,'GARBAGE AMT COLLECTED ',1,0,'C');
+                            $pdf->Cell(60,10,'MONTHLY TOTAL',1,0,'C');
+                            //filler; add new line
+                            $pdf->Cell(0,10,'',0,1,'L');
+
+                            
+                           
+                             //filler; add new line
+                            //$pdf->Cell(0,10,'',0,1,'L');
+
+                            $pdf->SetFont('Courier','',12);
+                            //for($i=0;$i<20;$i++)
+                            //    $pdf->Row(array(GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence()));
+                            //less than 12 (12 months)
+                            $elec_total_per_year = 0;
+                            $water_total_per_year = 0;
+                            $garbage_total_per_year = 0;
+                           
+                            $count = count($results);
+                            //echo "<br><br> "+$count;
+                            
+                            for($i=0;$i<$count;$i++){
+                                if($i==0){
+                                    $month = "January";
+                                }else if($i==1){
+                                    $month = "February";
+                                }else if($i==2){
+                                    $month = "March";
+                                }else if($i==3){
+                                    $month = "April";
+                                }else if($i==4){
+                                    $month = "May";
+                                }else if($i==5){
+                                    $month = "June";
+                                }else if($i==6){
+                                    $month = "July";
+                                }else if($i==7){
+                                    $month = "August";
+                                }else if($i==8){
+                                    $month = "September";
+                                }else if($i==9){
+                                    $month = "October";
+                                }else if($i==10){
+                                    $month = "November";
+                                }else if($i==11){
+                                    $month = "December";
+                                }
+
+                                
+                                $pdf->Row(array($month,number_format($results[$i]['elec_total'],2),number_format($results[$i]['water_total'],2),number_format($results[$i]['garbage_total'],2),number_format(($results[$i]['elec_total']+$results[$i]['water_total']+$results[$i]['garbage_total']),2)));
+                                
+                                $elec_total_per_year = $elec_total_per_year + $results[$i]['elec_total'];
+                                $water_total_per_year = $water_total_per_year + $results[$i]['water_total'];
+                                $garbage_total_per_year = $garbage_total_per_year + $results[$i]['garbage_total'];
+
+                                    
+                                
+                            }
+
+                            $utility_yearly_total = $elec_total_per_year +$water_total_per_year + $garbage_total_per_year;
+
+                            //last row of the table
+                            $pdf->SetFont('Courier','B',12);
+                            $pdf->Row(array("TOTAL", number_format($elec_total_per_year,2), number_format($water_total_per_year,2), number_format($garbage_total_per_year,2),number_format($utility_yearly_total,2)));
+
+                            $pdf->Cell(0,5,'',0,1,'L');
+                             //filler; add new line
+                            $pdf->Cell(0,5,'',0,1,'L');
+
+                            $pdf->SetFont('Arial','B',10);
+                            //table footers
+                            $pdf->Cell(100,5,'Prepared By:  ',0,0,'L');
+                            $pdf->Cell(100,5,'Checked By:   ',0,0,'L');
+                        
+                            //filler; add new line
+                            $pdf->Cell(0,15,'',0,1,'L');
+                            //signatories' names
+                            
+                            $pdf->Cell(100,5,'CRISTINA M. DE GUIA  ',0,0,'L');
+                            $pdf->Cell(100,5,'SUSAN G. TOLENTINO   ',0,0,'L');
+
+                            $pdf->Cell(0,5,'',0,1,'L');
+                            //signatories' designation
+                            $pdf->SetFont('Arial','',10);
+                            $pdf->Cell(100,5,'Admin Assistant II',0,0,'L');
+                            $pdf->Cell(100,5,'Project Devt Officer II',0,0,'L');
+
+                             $pdf->Cell(0,5,'',0,1,'L');
+                            //signatories' designation part II
+                            $pdf->Cell(100,5,'',0,0,'L');
+                            $pdf->Cell(100,5,'Head, Utility Billing Section',0,0,'L');
+                            //$pdf->Output('D',$results[0]['fullname']." ".$year."_SAO.pdf");
+                            $pdf->Output('D','try.pdf');
+                    }//results array has elements
+                    else{
+                        echo "<br><br><h3><span style='color:maroon;'>REPORT CANNOT BE GENERATED. NO RESULTS FOUND FOR THE DESIRED YEAR.<br><br>Click 
+                        <a href=".site_url('home/viewYearlyCollection').">here</a> to go back to the Yearly Collection Report generation page. </span></h3>";
+                    }
+                }else{
+                        redirect('login','refresh');
+                }
+        }//end of viewReadingsForCollection function
+
+
+
 
 function create_account_by_admin(){
      if($this->session->userdata('logged_in')){
@@ -1718,4 +1970,11 @@ function getYearBalance($elec_balance_curr,$water_balance_curr,$garbage_balance_
     $balance = $elec_balance_curr + $water_balance_curr + $garbage_balance_curr;
     return number_format($balance, 2, '.', '');
 }
+
+
+
+
+
+
+
 ?>

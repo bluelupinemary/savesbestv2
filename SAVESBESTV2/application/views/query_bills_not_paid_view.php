@@ -80,16 +80,7 @@
 
               echo form_open('Consumer/addPaymentToCollection');
               
-              echo '<br><br><b>Electricity OR Date:</b> <input type="date" size="5" name="elec_init_receipt_date" id="elec_init_receipt_date"> 
-                  <input type="checkbox" name="elec_init_receipt_date_box" onclick="fillElecReceiptDate(this.form)">
-                  <span style="color:maroon"><i>Check this box to set the same Receipt Date for all entries.</i></span>';
-              echo '<br><br><b>Water OR Date:</b> <input type="date" size="5" name="water_init_receipt_date" id="water_init_receipt_date"> 
-                  <input type="checkbox" name="water_init_receipt_date_box" onclick="fillWaterReceiptDate(this.form)">
-                  <span style="color:maroon"><i>Check this box to set the same Receipt Date for all entries.</i></span>';
-
-             echo '<br><br><b>Garbage OR Date:</b> <input type="date" size="5" name="garbage_init_receipt_date" id="garbage_init_receipt_date"> 
-                  <input type="checkbox" name="garbage_init_receipt_date_box" onclick="fillGarbageReceiptDate(this.form)">
-                  <span style="color:maroon"><i>Check this box to set the same Receipt Date for all entries.</i></span>';
+             
 
               echo ' <div style="font-size:0.8em;">
                        <table id="myTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
