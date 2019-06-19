@@ -349,7 +349,7 @@ Class accessed if user has successfully logged in
 				}
 		}//end of listConsumer
 
-		function viewBillsNotPaid(){
+		function viewCollectionNotPaid(){
 						//list users
 				if($this->session->userdata('logged_in')){
 						$session_data = $this->session->userdata('logged_in');
@@ -364,12 +364,38 @@ Class accessed if user has successfully logged in
 						$resultdata['username']=$data['username'];
 
 						$this->load->view('template/header_template_view');
-						$this->load->view('query_bills_not_paid_view',$resultdata);
+						$this->load->view('list_collection_not_paid_view',$resultdata);
 
 				}else{
 						redirect('login','refresh');
 				}
 		}//end of viewReadingsForCollection function
+
+		function viewYearlyCollection(){
+						//open page to query month and year of collection to be viewed
+				if($this->session->userdata('logged_in')){
+						$session_data = $this->session->userdata('logged_in');
+						$data['username'] = $session_data['username'];
+						$data['userid'] = $session_data['userid'];
+						$data['usertype'] = $session_data['usertype'];
+
+						
+
+						//access User.php model to get_consumers from the database
+						//$resultdata['results'] = $this->user->get_consumer_billings_for_collection();
+						$resultdata['results'] = $this->user->get_consumers();
+
+						$resultdata['username']=$data['username'];
+
+						$this->load->view('template/header_template_view');
+						$this->load->view('query_collection_for_yearly_report_view',$resultdata);
+						//$this->load->view('sample_pdf_view',$resultdata);
+
+				}else{
+						redirect('login','refresh');
+				}
+		}//end of viewYearlyCollection function
+
 
 		function queryBillsToView(){
 						//open page to query month and year of collection to be viewed
@@ -464,6 +490,28 @@ Class accessed if user has successfully logged in
 				}
 		}//end of viewReadingsForCollection function
 
+		function viewBillsNotPaid(){
+						//list users
+				if($this->session->userdata('logged_in')){
+						$session_data = $this->session->userdata('logged_in');
+						$data['username'] = $session_data['username'];
+						$data['userid'] = $session_data['userid'];
+						$data['usertype'] = $session_data['usertype'];
+
+						//access User.php model to get_consumers from the database
+						$resultdata['results'] = $this->user->get_consumer_collection_not_paid();
+						//$resultdata['id_arr'] = $this->user->get_id_consumer_collection_not_paid();
+						$resultdata['receipt_results'] = $this->user->get_receipt_per_bill();
+						$resultdata['username']=$data['username'];
+
+						$this->load->view('template/header_template_view');
+						$this->load->view('query_bills_not_paid_view',$resultdata);
+
+				}else{
+						redirect('login','refresh');
+				}
+		}//end of viewReadingsForCollection function
+
 		function queryCollectionToView(){
 						//open page to query month and year of collection to be viewed
 				if($this->session->userdata('logged_in')){
@@ -525,31 +573,6 @@ Class accessed if user has successfully logged in
 				}
 		}//end of viewReadingsForCollection function
 
-			function viewYearlyCollection(){
-						//open page to query month and year of collection to be viewed
-				if($this->session->userdata('logged_in')){
-						$session_data = $this->session->userdata('logged_in');
-						$data['username'] = $session_data['username'];
-						$data['userid'] = $session_data['userid'];
-						$data['usertype'] = $session_data['usertype'];
-
-						
-
-						//access User.php model to get_consumers from the database
-						//$resultdata['results'] = $this->user->get_consumer_billings_for_collection();
-						$resultdata['results'] = $this->user->get_consumers();
-
-						$resultdata['username']=$data['username'];
-
-						$this->load->view('template/header_template_view');
-						$this->load->view('query_collection_for_yearly_report_view',$resultdata);
-						//$this->load->view('sample_pdf_view',$resultdata);
-
-				}else{
-						redirect('login','refresh');
-				}
-		}//end of viewReadingsForCollection function
-
 		function queryCollectionReport(){
 						//open page to query month and year of collection to be viewed
 				if($this->session->userdata('logged_in')){
@@ -592,6 +615,89 @@ Class accessed if user has successfully logged in
 						redirect('login','refresh');
 				}
 		}//end of viewReadingsForCollection function
+		function listAdmins(){
+						//list users
+				if($this->session->userdata('logged_in')){
+						$session_data = $this->session->userdata('logged_in');
+						$data['username'] = $session_data['username'];
+						$data['userid'] = $session_data['userid'];
+						$data['usertype'] = $session_data['usertype'];
+
+						//access User.php model to get_consumers from the database
+						$resultdata['results'] = $this->user->get_admins();
+						$resultdata['username']=$data['username'];
+						//$added_to_db = false;
+						$this->load->view('template/header_template_view');
+						$this->load->view('list_admins_view',$resultdata);
+
+				}else{
+						redirect('login','refresh');
+				}
+		}//end of listConsumer
+
+
+		function updateAdmin(){
+		     $this->load->library('form_validation');
+
+		     if($this->session->userdata('logged_in')){
+		     $session_data = $this->session->userdata('logged_in');
+		     $data['username'] = $session_data['username'];
+		     $data['userid'] = $session_data['userid'];
+		     $data['usertype'] = $session_data['usertype'];
+		     
+		     $name = $this->input->post('name');
+		     $designation = $this->input->post('designation');
+		     $id = $this->input->post('id');
+
+		     $resultdata['username']=$data['username'];
+		     $resultdata['name'] = $name;
+		     $resultdata['designation'] = $designation;
+		     $resultdata['id'] = $id;
+
+
+
+
+		     $this->load->view('template/header_template_view');
+		     $this->load->view('edit_admin_details_view',$resultdata);
+
+		     }else{
+		         redirect('login','refresh');
+		     }
+	 	}
+
+	 	function updateAdminDetails(){
+        if($this->session->userdata('logged_in')){
+            $session_data = $this->session->userdata('logged_in');
+                    $data['username'] = $session_data['username'];
+                    $data['userid'] = $session_data['userid'];
+                    $data['usertype'] = $session_data['usertype']; 
+
+                     $admin_id = $this->input->post('admin_id');
+                     $name = $this->input->post('name');
+                     $designation = $this->input->post('designation');
+                     //echo "<br><br><br>";
+	                if($name!=NULL || $name !=""){
+	                	//echo "IN HOME: ". $name." ";
+	                	//echo $admin_id." ";
+	                	//echo $designation;
+		                $this->user->update_admin_info($admin_id,$name,$designation);
+	                	$resultdata['added_to_db'] = true;
+	                }
+	                   //$resultdata['results'] = $this->user->get_collections_for_edit($bill_id);
+                  //$resultdata['results'] =  $resultdata['username'] = $data['username'];
+              		$resultdata['results'] = $this->user->get_admins();
+                   $resultdata['username'] = $data['username'];
+                $this->load->view('template/header_template_view');
+                $this->load->view('list_admins_view',$resultdata);
+                        
+        }else{
+                    redirect('login','refresh');
+        }
+    }// end of function
+
+
+
+
 		/*
 		function listUser(){
             //list users

@@ -177,8 +177,8 @@
             // echo "<br><br> >>>>>>>> ";
             //print_r($receipt);
             echo "<td>".$i."-".$mon."</td>";
-            echo "<td>".$result['electricity_reading']."</td>".
-                  "<td>".$result['electricity_amount_paid']."</td>";
+            echo "<td>".number_format($result['electricity_reading'],2)."</td>".
+                  "<td>".number_format($result['electricity_amount_paid'],2)."</td>";
            $count = count($receipt_elec);
            //echo "COUNT: ".$count;
            if($count>0){
@@ -207,8 +207,8 @@
               echo  "<td></td>";
             }
 
-            echo "<td>".$result['water_reading']."</td>";
-            echo "<td>".$result['water_amount_paid']."</td>";
+            echo "<td>".number_format($result['water_reading'],2)."</td>";
+            echo "<td>".number_format($result['water_amount_paid'],2)."</td>";
             //echo "COUNT: ".$count;
             $count = count($receipt_water);
             if($count>0){
@@ -235,8 +235,8 @@
             }else{
               echo  "<td></td>";
             }
-            echo "<td>".$result['garbage_fee']."</td>";
-            echo "<td>".$result['garbage_amount_paid']."</td>";
+            echo "<td>".number_format($result['garbage_fee'],2)."</td>";
+            echo "<td>".number_format($result['garbage_amount_paid'],2)."</td>";
             $count = count($receipt_garbage);
             if($count>0){
             foreach($receipt_garbage as $util_receipt){
@@ -363,7 +363,7 @@
        // echo "<br><br>OK: ".$ok;
             if(isset($ok)){
             
-           // print_r($results);
+         //   print_r($results);
 
                 echo form_open('Consumer/createCollectionReportPDF');
 
@@ -446,7 +446,7 @@
                        echo '<input type="hidden" name="account_no" id="account_no" value="'.$account_no.'"  />';
                         echo '<input type="hidden" name="consumer_id" id="consumer_id" value="'.$consumer_id.'"  />';
                         echo '<input type="hidden" name="year" id="year" value="'.$year.'"  />';
-                           echo "<button style='float:right;' data-toggle='tooltip' title='SAVE PAYMENT' type='submit' class='btn btn-warning'>DOWNLOAD SOA REPORT</button><br><br>";
+                           echo "<button style='float:right;' data-toggle='tooltip' title='PRINT SOA' type='submit' class='btn btn-warning'>DOWNLOAD SOA REPORT</button><br><br>";
                                 //echo form_button($delete_button);
                        "</form></div>";
                       echo form_close();

@@ -248,6 +248,12 @@
 			return $query->result_array();
  		} //end of get consumers
 
+ 		//model function to get consumers from the database
+		function get_admins(){
+			$query = $this->db->query("select * from utility_admins");
+			$result = $query->result_array();
+			return $result;
+ 		} //end of get consumers
 
  		//function to get a consumer's details/info
 		function get_consumer_profile($consumer_id){
@@ -620,15 +626,6 @@
 
  		function get_consumer_collection_not_paid(){
 			$query = $this->db->query("select a.*,b.fullname as fullname,b.address,b.consumer_type,(a.electricity_reading - c.electricity_amount_paid) as electricity_balance, (a.water_reading - c.water_amount_paid) as water_balance, (a.garbage_fee - c.garbage_amount_paid) as garbage_balance from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where a.is_paid=0 or a.is_paid is null");
-			
-			
-			return $query->result_array();
-
-
- 		} //end of get consumers
-
- 		function get_consumer_billings_not_paid_by_month_year($month,$year){
-			$query = $this->db->query("select a.*,b.account_no, b.fullname as fullname,b.address,b.consumer_type,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where (a.is_paid=0 or a.is_paid is null) and a.bill_month=".$month." and a.bill_year=".$year);
 			
 			
 			return $query->result_array();
@@ -1612,9 +1609,9 @@
 
  		} //end of get consumers
 
- 		function get_yearly_collections_for_report_view($year){
+ 		function get_yearly_collections_for_report_view($year,$account_no){
 			//echo "<br><br>ditooooooooo";
-			$query = $this->db->query("select b.bill_month, sum(a.electricity_amount_paid) as elec_total, sum(a.water_amount_paid) as water_total, sum(a.garbage_amount_paid) as garbage_total from consumer_collection a JOIN consumer_bill b ON a.bill_id=b.id where b.bill_year=".$year." GROUP BY b.bill_month ORDER BY b.bill_month");
+			$query = $this->db->query("select a.id,a.bill_month, a.electricity_reading, a.water_reading, a.garbage_fee, b.fullname,b.address,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid, c.surcharge, c.receipt_number, c.receipt_date from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where a.bill_year=".$year." and b.account_no=".$account_no);
 
 			return $query->result_array();
 
@@ -1622,6 +1619,44 @@
  		} //end of get consumers
 
 
+		function get_collections_per_year($year){
+			
+			$query = $this->db->query("select b.bill_month, sum(a.electricity_amount_paid) as elec_total, sum(a.water_amount_paid) as water_total, sum(a.garbage_amount_paid) as garbage_total from consumer_collection a JOIN consumer_bill b ON a.bill_id=b.id where b.bill_year=".$year." GROUP BY b.bill_month ORDER BY b.bill_month");
+
+			return $query->result_array();
+
+
+ 		} //end of get collections per year
+
+		function get_consumer_billings_not_paid_by_month_year($month,$year){
+			$query = $this->db->query("select a.*,b.account_no, b.fullname as fullname,b.address,b.consumer_type,c.electricity_amount_paid, c.water_amount_paid, c.garbage_amount_paid from consumer_bill a join consumer b on a.consumer_id=b.id join consumer_collection c on a.id=c.bill_id where (a.is_paid=0 or a.is_paid is null) and a.bill_month=".$month." and a.bill_year=".$year);
+			
+			
+			return $query->result_array();
+
+
+ 		} //end of get consumers
+
+
+ 		function update_admin_info($id,$name,$designation){
+  		
+  			$data=array(
+		    		'name'=>$name,
+		    		'designation'=>$designation
+					);
+
+			$this->db->where('id',$id);
+	  		$this->db->update('utility_admins',$data);
+  			
+  		}//end of function
+
+  		function get_admin_details(){
+ 			$query = $this->db->query("select * from utility_admins");
+			
+			
+			return $query->result_array();
+
+ 		}
 
  		
 

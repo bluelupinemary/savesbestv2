@@ -83,13 +83,13 @@
     								      <span class="text-content"><span>EDIT CONSUMER DETAILS</span></span>
     								    </a>
     								</li>
-                    <!--li>
-                        <a href="<?php echo site_url('home/editConsumer') ?>">
-                          <img src="<?php echo base_url();?>devtools/images/coleasee.png" width="100px" height="100px" alt="image goes here"></img>
-                          <span class="text-content"><span>ADD A COLEASEE</span></span>
+                    <li>
+                        <a href="<?php echo site_url('home/listAdmins') ?>">
+                          <img src="<?php echo base_url();?>devtools/images/edit_admin.png" width="100px" height="100px" alt="image goes here"></img>
+                          <span class="text-content"><span>EDIT ADMIN INFO</span></span>
                         </a>
                     </li>
-                     <li>
+                     <!--li>
                         <a href="<?php echo site_url('home/editConsumer') ?>">
                           <img src="<?php echo base_url();?>devtools/images/inactive_consumers.png" width="100px" height="100px" alt="image goes here"></img>
                           <span class="text-content"><span>VIEW INACTIVE CONSUMERS</span></span>

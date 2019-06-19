@@ -37,8 +37,9 @@
       <h4>Please enter the details to be edited: </h4>
     </div>
     <div class="reg_form">
-        <?php echo form_open('Consumer/findIndividualCollection'); ?>
-        
+        <?php echo form_open('Consumer/findIndividualCollection'); 
+       
+	?>	
         <div class="col-md-4 form-group" style="padding-left:15%;padding-right:5%;">
        
         <p>
@@ -82,7 +83,9 @@
            // print_r($results);
 
                 echo form_open('Consumer/updateConsumerPaymentInCollection');
-
+		  echo '<br><br><b>OR Date:</b> <input type="date" size="5" name="or_date" id="or_date"> 
+                  <input type="checkbox" name="or_date_box" onclick="fillORReceiptDate(this.form)">
+                  <span style="color:maroon"><i>Check this box to set the same Receipt Date for Electricity,Water and Garbage entries.</i></span>';
                 echo '<div style="font-size:0.7em;">';
                // print_r($receipt_results);
                 echo '<table id="myTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >';
@@ -354,6 +357,23 @@ function changeGarbageBal(newGarbageVal){
  
   document.getElementById('garbage_balance').value = garbage_bal.toFixed(2);
 }
+
+function fillORReceiptDate(f) {
+      console.log("called");
+      if(f.or_date_box.checked == true) {
+        //console.log("init: "+f.or_date.value);
+	//console.log("elec: "+f.elec_receipt_date.value);
+       
+       // for (i = 0; i < f.or_date.length; i++) {
+	//console.log("date: "+i);
+	 f.elec_receipt_date.value = f.or_date.value;
+	 f.water_receipt_date.value =f.or_date.value;
+	 f.garbage_receipt_date.value = f.or_date.value;
+          //f.or_date[i].value = f.or_date.value;
+         //console.log("else: "+f.or_date.value);
+        // }
+      }
+    }
 
 
 </script>

@@ -65,7 +65,7 @@
               
              echo form_open('Consumer/createYearlyCollectionReportPDF');
 
-              echo ' <div style="font-size:0.8em; padding-left:10%;padding-right:10%;">
+              echo ' <div style="font-size:1.2em; padding-left:10%;padding-right:10%;">
                        <table id="" class="table table-striped table-bordered" cellspacing="0" width="100%" >
                          <thead>
                            <tr>
