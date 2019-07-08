@@ -1619,9 +1619,31 @@
  		} //end of get consumers
 
 
-		function get_collections_per_year($year){
+		function get_collections_per_year($year,$utility_type){
+			$colname = "";
+			if($utility_type==1){
+				$colname = "electricity_amount_paid";
+			}else if($utility_type==2){
+				$colname = "water_amount_paid";
+			}else if($utility_type==3){
+				$colname = "garbage_amount_paid";
+			}
+			$query = $this->db->query("select MONTH( c.receipt_date ) AS receipt_month, SUM( ".$colname." ) AS total
+				FROM consumer_collection a
+				JOIN receipt c ON a.bill_id = c.bill_id
+				WHERE YEAR( c.receipt_date ) =".$year."
+				AND utility_type =".$utility_type."
+				GROUP BY receipt_month
+				ORDER BY receipt_month");
 			
-			$query = $this->db->query("select b.bill_month, sum(a.electricity_amount_paid) as elec_total, sum(a.water_amount_paid) as water_total, sum(a.garbage_amount_paid) as garbage_total from consumer_collection a JOIN consumer_bill b ON a.bill_id=b.id where b.bill_year=".$year." GROUP BY b.bill_month ORDER BY b.bill_month");
+			//$query = $this->db->query("select month(c.receipt_date) as receipt_month, sum(a.electricity_amount_paid) as elec_total, sum(a.water_amount_paid) as water_total, sum(a.garbage_amount_paid) as garbage_total from consumer_collection a JOIN receipt c ON a.bill_id=c.bill_id where year(c.receipt_date)=".$year." GROUP BY receipt_month ORDER BY receipt_month");
+			
+			// $query = $this->db->query("select MONTH( c.receipt_date ) AS receipt_month, c.utility_type, SUM( electricity_amount_paid ) AS elec_total, SUM( water_amount_paid ) AS water_total, SUM( a.garbage_amount_paid ) AS garbage_total
+			// 	FROM consumer_collection a
+			// 	JOIN receipt c ON a.bill_id = c.bill_id
+			// 	WHERE YEAR( c.receipt_date ) =".$year."
+			// 	GROUP BY receipt_month, c.utility_type
+			// 	ORDER BY receipt_month");
 
 			return $query->result_array();
 

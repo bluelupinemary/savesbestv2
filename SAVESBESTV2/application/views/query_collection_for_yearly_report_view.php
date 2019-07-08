@@ -85,48 +85,63 @@
                                 $waterTotalPerYear = 0;
                                 $garbageTotalPerYear = 0;
                                 $month='';
-                               $c = count($results);
+                              
+
                               // echo "ITOOOOO".$c;
-                               foreach($results as $result){
-                               // echo "<br> aaaaaaa".$result['bill_month'];
-                                  if($result['bill_month']==1){
+                               // echo "<br> <br> elec >> ";
+                               // print_r($results_elec);
+                               // echo "<br> <br> water >> ";
+
+                               // print_r($results_water);
+                               // echo "<br> <br> garbage >> ";
+                               // print_r($results_garbage);
+                             
+                                
+                                for($i=1;$i<=12;$i++){
+                                  if($i==1){
                                       $month="January";
-                                  }else if($result['bill_month']==2){
+                                  }else if($i==2){
                                       $month="February";
-                                  }else if($result['bill_month']==3){
-                                      $month="March";
-                                  }else if($result['bill_month']==4){
+                                  }else if($i==3){
+                                      $month="March";   
+                                  }else if($i==4){
                                       $month="April";
-                                  }else if($result['bill_month']==5){
+                                  }else if($i==5){
                                       $month="May";
-                                  }else if($result['bill_month']==6){
+                                  }else if($i==6){
                                       $month="June";
-                                  }else if($result['bill_month']==7){
+                                  }else if($i==7){
                                       $month="July";
-                                  }else if($result['bill_month']==8){
+                                  }else if($i==8){
                                       $month="August";
-                                  }else if($result['bill_month']==9){
+                                  }else if($i==9){
                                       $month="September";
-                                  }else if($result['bill_month']==10){
+                                  }else if($i==10){
                                       $month="October";
-                                  }else if($result['bill_month']==11){
+                                  }else if($i==11){
                                       $month="November";
-                                  }else if($result['bill_month']==12){
+                                  }else if($i==12){
                                       $month="December";
                                   }
+                                
+                                  $temp_elec = getMonthlyAmount($results_elec,$i);
+                                  $temp_water = getMonthlyAmount($results_water,$i);
+                                  $temp_garbage = getMonthlyAmount($results_garbage,$i);
+                               
+                                
 
 
-                                $totalElecPerMonth = number_format($result['elec_total'],2);
-                                $totalWaterPerMonth = number_format($result['water_total'],2);
-                                $totalGarbagePerMonth = number_format($result['garbage_total'],2);
+                                $totalElecPerMonth = number_format($temp_elec,2);
+                                $totalWaterPerMonth = number_format($temp_water,2);
+                                $totalGarbagePerMonth = number_format($temp_garbage,2);
 
                                
-                                $electricityTotalPerYear = floatval($electricityTotalPerYear) + $result['elec_total'];
+                                $electricityTotalPerYear = floatval($electricityTotalPerYear) + $temp_elec;
                                
                                 //$electricityTotalPerYear = number_format($electricityTotalPerYear,2);
-                                $waterTotalPerYear = floatval($waterTotalPerYear) + $result['water_total'];
-                                $garbageTotalPerYear = floatval($garbageTotalPerYear) + $result['garbage_total'];
-                                $totalCollectionPerMonth = $result['elec_total'] + $result['water_total'] + $result['garbage_total'];
+                                $waterTotalPerYear = floatval($waterTotalPerYear) + $temp_water;
+                                $garbageTotalPerYear = floatval($garbageTotalPerYear) + $temp_garbage;
+                                $totalCollectionPerMonth = $temp_elec + $temp_water + $temp_garbage;
                                  // $consumer_array = array();
                                   echo "<tr style='text-align:right;font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;'>".
 
@@ -182,3 +197,22 @@
   <script src="../../devtools/js/collectionjs.js">
 
      </script>
+
+<?php
+
+
+function getMonthlyAmount($results,$month){
+  if($results!=NULL or $results!=''){
+      foreach($results as $result){
+          if($result['receipt_month']==$month){
+              return $result['total'];
+          }
+      }
+      return 0;
+  }
+  return 0;
+
+
+}
+
+?>

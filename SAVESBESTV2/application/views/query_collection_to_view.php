@@ -86,6 +86,11 @@
 		  echo '<br><br><b>OR Date:</b> <input type="date" size="5" name="or_date" id="or_date"> 
                   <input type="checkbox" name="or_date_box" onclick="fillORReceiptDate(this.form)">
                   <span style="color:maroon"><i>Check this box to set the same Receipt Date for Electricity,Water and Garbage entries.</i></span>';
+
+		echo '<br><br><b>OR No:</b> <input type="text" size="5" name="init_receipt_no" id="init_receipt_no"> 
+                  <input type="checkbox" name="init_receipt_no_box" onclick="fillORReceiptNo(this.form)">
+                  <span style="color:maroon"><i>Check this box to set the same <b>Receipt No</b> for Electricity,Water and Garbage entries.</i></span>';
+
                 echo '<div style="font-size:0.7em;">';
                // print_r($receipt_results);
                 echo '<table id="myTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >';
@@ -372,6 +377,20 @@ function fillORReceiptDate(f) {
           //f.or_date[i].value = f.or_date.value;
          //console.log("else: "+f.or_date.value);
         // }
+      }
+    }
+
+ function fillORReceiptNo(f) {
+      
+      if(f.init_receipt_no_box.checked == true) {
+        //console.log("init: "+f.init_receipt_date.value);
+     
+       
+          f.elec_receipt_no.value = f.init_receipt_no.value;
+	  f.water_receipt_no.value = f.init_receipt_no.value;
+	  f.garbage_receipt_no.value = f.init_receipt_no.value;
+          // console.log("else: "+f.receipt_date[i]);
+        
       }
     }
 

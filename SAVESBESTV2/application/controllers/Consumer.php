@@ -910,14 +910,17 @@ function showImportedBillings(){
 
             //echo "<br><br><br><br><br><br><br> >>>>> ".$year;
            
-            $resultdata['results'] = $this->user->get_collections_per_year($year);
+            $resultdata['results_elec'] = $this->user->get_collections_per_year($year,1);
+            $resultdata['results_water'] = $this->user->get_collections_per_year($year,2);
+            $resultdata['results_garbage'] = $this->user->get_collections_per_year($year,3);
+       
             //print_r($resultdata['results']);
 
             $resultdata['username'] = $data['username'];
            
             $resultdata['report_year'] = $temp_year;
             
-            $count = count($resultdata['results']);
+            $count = count($resultdata['results_elec']);
                // echo "<br><br>COUNT: ".$count;
             if($count > 0){
                     $resultdata['ok'] = true;
@@ -1405,13 +1408,14 @@ function showImportedBillings(){
                       //  $consumer_id = intval($temp_consumer_id);
                         $year = intval($temp_year);
                         $admins = $this->user->get_admin_details();
-                        $results = $this->user->get_collections_per_year($year);
-                        //print_r($resultdata['results']);
+                        $results_elec = $this->user->get_collections_per_year($year,1);
+                        $results_water = $this->user->get_collections_per_year($year,2);
+                        $results_garbage = $this->user->get_collections_per_year($year,3);
 
                        
                         $resultdata['report_year'] = $year;
                         
-                        $count = count($results);
+                        $count = count($results_elec);
                            // echo "<br><br>COUNT: ".$count;
                         if($count > 0){
                                 $resultdata['ok'] = true;
@@ -1421,7 +1425,7 @@ function showImportedBillings(){
 
                        
                         //print_r($results);
-                        if($results!=null){
+                        if($results_elec!=NULL || $results_water!=NULL or $results_garbage!=NULL){
                             $pdf=new PDF_MC_Table();
                             $pdf->AddPage('L','A4',0);
                             $pdf->SetFont('Arial','',10);
@@ -1469,53 +1473,88 @@ function showImportedBillings(){
                             //$pdf->Cell(0,10,'',0,1,'L');
 
                             $pdf->SetFont('Courier','',12);
-                            //for($i=0;$i<20;$i++)
-                            //    $pdf->Row(array(GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence(),GenerateSentence()));
-                            //less than 12 (12 months)
+                            
                             $elec_total_per_year = 0;
                             $water_total_per_year = 0;
                             $garbage_total_per_year = 0;
                            
-                            $count = count($results);
+                            //$count = count($results);
                             //echo "<br><br> "+$count;
                             
-                            for($i=0;$i<$count;$i++){
-                                if($i==0){
-                                    $month = "January";
-                                }else if($i==1){
-                                    $month = "February";
-                                }else if($i==2){
-                                    $month = "March";
-                                }else if($i==3){
-                                    $month = "April";
-                                }else if($i==4){
-                                    $month = "May";
-                                }else if($i==5){
-                                    $month = "June";
-                                }else if($i==6){
-                                    $month = "July";
-                                }else if($i==7){
-                                    $month = "August";
-                                }else if($i==8){
-                                    $month = "September";
-                                }else if($i==9){
-                                    $month = "October";
-                                }else if($i==10){
-                                    $month = "November";
-                                }else if($i==11){
-                                    $month = "December";
-                                }
+                            // foreach ($results as $result) {
+                            //     if($result['receipt_month']==1){
+                            //         $month = "January";
+                            //     }else if($result['receipt_month']==2){
+                            //         $month = "February";
+                            //     }else if($result['receipt_month']==3){
+                            //         $month = "March";
+                            //     }else if($result['receipt_month']==4){
+                            //         $month = "April";
+                            //     }else if($result['receipt_month']==5){
+                            //         $month = "May";
+                            //     }else if($result['receipt_month']==6){
+                            //         $month = "June";
+                            //     }else if($result['receipt_month']==7){
+                            //         $month = "July";
+                            //     }else if($result['receipt_month']==8){
+                            //         $month = "August";
+                            //     }else if($result['receipt_month']==9){
+                            //         $month = "September";
+                            //     }else if($result['receipt_month']==10){
+                            //         $month = "October";
+                            //     }else if($result['receipt_month']==11){
+                            //         $month = "November";
+                            //     }else if($result['receipt_month']==12){
+                            //         $month = "December";
+                            //     }
 
-                                
-                                $pdf->Row(array($month,number_format($results[$i]['elec_total'],2),number_format($results[$i]['water_total'],2),number_format($results[$i]['garbage_total'],2),number_format(($results[$i]['elec_total']+$results[$i]['water_total']+$results[$i]['garbage_total']),2)));
-                                
-                                $elec_total_per_year = $elec_total_per_year + $results[$i]['elec_total'];
-                                $water_total_per_year = $water_total_per_year + $results[$i]['water_total'];
-                                $garbage_total_per_year = $garbage_total_per_year + $results[$i]['garbage_total'];
 
-                                    
+                                for($i=1;$i<=12;$i++){
+                                  if($i==1){
+                                      $month="January";
+                                  }else if($i==2){
+                                      $month="February";
+                                  }else if($i==3){
+                                      $month="March";   
+                                  }else if($i==4){
+                                      $month="April";
+                                  }else if($i==5){
+                                      $month="May";
+                                  }else if($i==6){
+                                      $month="June";
+                                  }else if($i==7){
+                                      $month="July";
+                                  }else if($i==8){
+                                      $month="August";
+                                  }else if($i==9){
+                                      $month="September";
+                                  }else if($i==10){
+                                      $month="October";
+                                  }else if($i==11){
+                                      $month="November";
+                                  }else if($i==12){
+                                      $month="December";
+                                  }
+
+                                $temp_elec = getMonthlyValue($results_elec,$i);
+                                $temp_water = getMonthlyValue($results_water,$i);
+                                $temp_garbage = getMonthlyValue($results_garbage,$i);
+
+                                // $pdf->Row(array($month,number_format($result['elec_total'],2),number_format($result['water_total'],2),number_format($result['garbage_total'],2),number_format(($result['elec_total']+$result['water_total']+$result['garbage_total']),2)));
                                 
+                                //  $elec_total_per_year = $elec_total_per_year + $result['elec_total'];
+                                //  $water_total_per_year = $water_total_per_year + $result['water_total'];
+                                //  $garbage_total_per_year = $garbage_total_per_year + $result['garbage_total'];
+
+                                 $pdf->Row(array($month,number_format($temp_elec,2),number_format($temp_water,2),number_format($temp_garbage,2),number_format(($temp_elec+$temp_water+$temp_garbage),2)));
+                                
+                                 $elec_total_per_year = $elec_total_per_year + $temp_elec;
+                                 $water_total_per_year = $water_total_per_year + $temp_water;
+                                 $garbage_total_per_year = $garbage_total_per_year + $temp_garbage;
+
+
                             }
+                          
 
                             $utility_yearly_total = $elec_total_per_year +$water_total_per_year + $garbage_total_per_year;
 
@@ -1739,7 +1778,12 @@ var $aligns;
     }
 }
 
-     
+
+function getElectricCollection($month,$results){
+
+}
+
+ 
 
 function getElectricBill($month,$results){
     for($i=0;$i<count($results);$i++){
@@ -1954,4 +1998,19 @@ function getYearBalance($elec_balance_curr,$water_balance_curr,$garbage_balance_
     $balance = $elec_balance_curr + $water_balance_curr + $garbage_balance_curr;
     return number_format($balance, 2);
 }
+
+function getMonthlyValue($results,$month){
+  if($results!=NULL or $results!=''){
+      foreach($results as $result){
+          if($result['receipt_month']==$month){
+              return $result['total'];
+          }
+      }
+      return 0;
+  }
+  return 0;
+
+
+}
+
 ?>
