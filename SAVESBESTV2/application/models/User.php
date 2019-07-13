@@ -722,8 +722,6 @@
 		    		'electricity_amount_paid'=>$electricity,
 		    		'water_amount_paid'=>$water,
 		    		'garbage_amount_paid'=>$garbage,
-		    		//'receipt_number'=>$receiptNo,
-		    		//'receipt_date'=>$receiptDate,
 		    		'date_added'=>$date_added
 					);
 
@@ -779,7 +777,7 @@
 					);
 					$this->db->insert('receipt',$data4);
   				}
-
+  				//if electricity/water/garbage amount from input is greater than or equal the amount fetched from the bill; update the status to paid
 	  		 	if($electricity >= $bill_elec_amount && $water >= $bill_water_amount && $garbage >= $bill_garbage_amount){
 	  				$data=array(
 	    				'is_paid'=>1
@@ -791,7 +789,6 @@
 
 
 	  			//START OF CHECKING FOR CONSUMER_ELECTRIC_BALANCE
-
 
 	  			$prev_year = intval($bill_year)-1;
 	  			//check if the consumer has an electric overpayment/underpayment from the previous year
@@ -822,32 +819,38 @@
 
 	  			//if there is no record yet of the current year's electric balance and if the current bill is the first month of the year
 				if($count==0){
-					//check for an overpayment for the current month (if positive, overpayment)
+					//check if the consumer has paid more than the bill amount for the current month (if positive, overpayment)
 					$elec_overpayment=0;
 					$elec_current_balance=0;
-					$total_elec_bal = $prev_elec_bal;
+					$total_elec_bal = $prev_elec_bal;		//set the previous year's balance 										to current total electric balance
 					
-					// if there is an overpayment in the current month-year collection 
-	  				if($electricity > $bill_elec_amount){
-						$elec_overpayment = $electricity - $bill_elec_amount;
-						//and if the previous elec balance is an underpayment (negative value)
+					// if the user has paid more than or equal to the amount indicated in the bill for the current month-year
+	  				if($electricity >= $bill_elec_amount){
+						//and if the previous year's electric balance is an underpayment ( a negative value / may utang yung consumer)
 						if($total_elec_bal <= 0){
+							//deduct electric bill amount from the amount paid by the consumer
+							//$elec_overpayment = $electricity - $bill_elec_amount;
+							
+							$elec_overpayment = $electricity - $bill_elec_amount;
 							//add the excess to the underpayment
 							$total_elec_bal = $total_elec_bal + $elec_overpayment;
 						}else{
-						//if the previous elec balance is an overpayment (positive value), we should deduct the excess from the overpayment
-							$total_elec_bal = $total_elec_bal + $elec_overpayment;
+						//if the previous elec balance is an overpayment (positive value), we should add the excess amount
+							$total_elec_bal = $total_elec_bal - $electricity;
 						}
 	  				}
-	  				//else if the consumer has an underpayment for the current month
+	  				//else if consumer's payment is less than the electric bill amount for the current month
 	  				else if($electricity < $bill_elec_amount){
 	  					$elec_current_balance = $bill_elec_amount - $electricity;
-						//and if the previous elec balance is an underpayment (negative value)
+						//and if the previous year's electric balance is an underpayment (negative value) / may utang si consumer
 						if($total_elec_bal <= 0){
 							//add to the underpayment
 							$total_elec_bal = $total_elec_bal - $elec_current_balance;
+						}else{
+							//if the previous elec balance is an overpayment (positive value), we should add the excess amount
+							$total_elec_bal = $total_elec_bal + $elec_current_balance;
 						}
-	  					
+	  				
 	  				}
 
 					
@@ -870,28 +873,36 @@
 					$elec_current_balance=0;
 					$total_elec_bal = $elec_bal;
 					
-					// if there is an overpayment in the current month-year collection 
-	  				if($electricity > $bill_elec_amount){
-						$elec_overpayment = $electricity - $bill_elec_amount;
-						//and if the previous elec balance is an underpayment (negative value)
+					// if the user has paid more than or equal to the amount indicated in the bill for the current month-year
+	  				if($electricity >= $bill_elec_amount){
+						//and if the previous year's electric balance is an underpayment ( a negative value / may utang yung consumer)
 						if($total_elec_bal <= 0){
+							//deduct electric bill amount from the amount paid by the consumer
+							//$elec_overpayment = $electricity - $bill_elec_amount;
+							
+							$elec_overpayment = $electricity - $bill_elec_amount;
 							//add the excess to the underpayment
 							$total_elec_bal = $total_elec_bal + $elec_overpayment;
 						}else{
-						//if the previous elec balance is an overpayment (positive value), we should deduct the excess from the overpayment
-							$total_elec_bal = $total_elec_bal + $elec_overpayment;
+						//if the previous elec balance is an overpayment (positive value), we should add the excess amount
+							$total_elec_bal = $total_elec_bal - $electricity;
 						}
 	  				}
-	  				//else if the consumer has an underpayment for the current month
+	  				//else if consumer's payment is less than the electric bill amount for the current month
 	  				else if($electricity < $bill_elec_amount){
-	  					$elec_current_balance = $bill_elec_amount - $electricity;
-						//and if the previous elec balance is an underpayment (negative value)
+	  					
+						//and if the previous year's electric balance is an underpayment (negative value) / may utang si consumer
 						if($total_elec_bal <= 0){
+							$elec_current_balance = $bill_elec_amount - $electricity;
 							//add to the underpayment
 							$total_elec_bal = $total_elec_bal - $elec_current_balance;
+						}else{
+							//if the previous elec balance is an overpayment (positive value), we should add the excess amount
+							$total_elec_bal = $total_elec_bal - $electricity;
 						}
-	  					
+	  				
 	  				}
+	  				
 
 	  				//update the current year's balance in the database
 	  				$data6=array(
@@ -934,34 +945,38 @@
 
 
 
-	  			//if there is no record yet of the current year's electric balance and if the current bill is the first month of the year
+	  			//if there is no record yet of the current year's water balance and if the current bill is the first month of the year
 				if($count==0){
 					//check for an overpayment for the current month
 					$water_overpayment=0;
 					$water_current_balance=0;
 					$total_water_bal = $prev_water_bal;
 
-					// if there is an overpayment in the current month-year collection 
-	  				if($water > $bill_water_amount){
-						$water_overpayment = $water - $bill_water_amount;
-						//and if the previous elec balance is an underpayment (negative value)
+					// if the user has paid more than or equal to the amount indicated in the bill for the current month-year
+	  				if($water >= $bill_water_amount){
+						//and if the previous year's water balance is an underpayment ( a negative value / may utang yung consumer)
 						if($total_water_bal <= 0){
+							//deduct water bill amount from the amount paid by the consumer
+							$water_overpayment = $water - $bill_water_amount;
 							//add the excess to the underpayment
 							$total_water_bal = $total_water_bal + $water_overpayment;
 						}else{
-						//if the previous elec balance is an overpayment (positive value), we should deduct the excess from the overpayment
-							$total_water_bal = $total_water_bal + $water_overpayment;
+						//if the previous water balance is an overpayment (positive value), we should add the excess amount
+							$total_water_bal = $total_water_bal - $water;
 						}
 	  				}
-	  				//else if the consumer has an underpayment for the current month
+	  				//else if consumer's payment is less than the water bill amount for the current month
 	  				else if($water < $bill_water_amount){
 	  					$water_current_balance = $bill_water_amount - $water;
-						//and if the previous elec balance is an underpayment (negative value)
+						//and if the previous year's water balance is an underpayment (negative value) / may utang si consumer
 						if($total_water_bal <= 0){
 							//add to the underpayment
 							$total_water_bal = $total_water_bal - $water_current_balance;
+						}else{
+							//if the previous water balance is an overpayment (positive value), we should add the excess amount
+							$total_water_bal = $total_water_bal + $water_current_balance;
 						}
-	  					
+	  				
 	  				}
 					
 	  				//insert the current year's balance to the database
@@ -982,27 +997,34 @@
 					$water_current_balance=0;
 					$total_water_bal = $water_bal;
 					
-					// if there is an overpayment in the current month-year collection 
-	  				if($water > $bill_water_amount){
-						$water_overpayment = $water - $bill_water_amount;
-						//and if the previous elec balance is an underpayment (negative value)
+
+					// if the user has paid more than or equal to the amount indicated in the bill for the current month-year
+	  				if($water >= $bill_water_amount){
+						//and if the previous year's water balance is an underpayment ( a negative value / may utang yung consumer)
 						if($total_water_bal <= 0){
+							//deduct water bill amount from the amount paid by the consumer
+							
+							$water_overpayment = $water - $bill_water_amount;
 							//add the excess to the underpayment
 							$total_water_bal = $total_water_bal + $water_overpayment;
 						}else{
-						//if the previous elec balance is an overpayment (positive value), we should deduct the excess from the overpayment
-							$total_water_bal = $total_water_bal + $water_overpayment;
+						//if the previous elec balance is an overpayment (positive value), we should add the excess amount
+							$total_water_bal = $total_water_bal - $water;
 						}
 	  				}
-	  				//else if the consumer has an underpayment for the current month
+	  				//else if consumer's payment is less than the water bill amount for the current month
 	  				else if($water < $bill_water_amount){
-	  					$water_current_balance = $bill_water_amount - $water;
-						//and if the previous elec balance is an underpayment (negative value)
+	  					
+						//and if the previous year's water balance is an underpayment (negative value) / may utang si consumer
 						if($total_water_bal <= 0){
+							$water_current_balance = $bill_water_amount - $water;
 							//add to the underpayment
 							$total_water_bal = $total_water_bal - $water_current_balance;
+						}else{
+							//if the previous water balance is an overpayment (positive value), we should add the excess amount
+							$total_water_bal = $total_water_bal - $water;
 						}
-	  					
+	  				
 	  				}
 
 	  				//update the current year's balance in the database
@@ -1043,34 +1065,38 @@
 
 
 
-	  			//if there is no record yet of the current year's electric balance and if the current bill is the first month of the year
+	  			//if there is no record yet of the current year's water balance and if the current bill is the first month of the year
 				if($count==0){
 					//check for an overpayment for the current month
 					$garbage_overpayment=0;
 					$garbage_current_balance=0;
 					$total_garbage_bal = $prev_garbage_bal;
-					
-					// if there is an overpayment in the current month-year collection 
-	  				if($garbage > $bill_garbage_amount){
-						$garbage_overpayment = $garbage - $bill_garbage_amount;
-						//and if the previous elec balance is an underpayment (negative value)
+
+					// if the user has paid more than or equal to the amount indicated in the bill for the current month-year
+	  				if($garbage >= $bill_garbage_amount){
+						//and if the previous year's garbage balance is an underpayment ( a negative value / may utang yung consumer)
 						if($total_garbage_bal <= 0){
+							//deduct garbage bill amount from the amount paid by the consumer
+							$garbage_overpayment = $garbage - $bill_garbage_amount;
 							//add the excess to the underpayment
 							$total_garbage_bal = $total_garbage_bal + $garbage_overpayment;
 						}else{
-						//if the previous elec balance is an overpayment (positive value), we should deduct the excess from the overpayment
-							$total_garbage_bal = $total_garbage_bal + $garbage_overpayment;
+						//if the previous water balance is an overpayment (positive value), we should add the excess amount
+							$total_garbage_bal = $total_garbage_bal - $garbage;
 						}
 	  				}
-	  				//else if the consumer has an underpayment for the current month
+	  				//else if consumer's payment is less than the water bill amount for the current month
 	  				else if($garbage < $bill_garbage_amount){
 	  					$garbage_current_balance = $bill_garbage_amount - $garbage;
-						//and if the previous elec balance is an underpayment (negative value)
+						//and if the previous year's garbage balance is an underpayment (negative value) / may utang si consumer
 						if($total_garbage_bal <= 0){
 							//add to the underpayment
 							$total_garbage_bal = $total_garbage_bal - $garbage_current_balance;
+						}else{
+							//if the previous garbage balance is an overpayment (positive value), we should add the excess amount
+							$total_garbage_bal = $total_garbage_bal + $garbage_current_balance;
 						}
-	  					
+	  				
 	  				}
 	  				//insert the current year's balance to the database
 	  				$data9=array(
@@ -1090,27 +1116,34 @@
 					$garbage_current_balance=0;
 					$total_garbage_bal = $garbage_bal;
 					
-					// if there is an overpayment in the current month-year collection 
-	  				if($garbage > $bill_garbage_amount){
-						$garbage_overpayment = $garbage - $bill_garbage_amount;
-						//and if the previous elec balance is an underpayment (negative value)
+
+					// if the user has paid more than or equal to the amount indicated in the bill for the current month-year
+	  				if($garbage >= $bill_garbage_amount){
+						//and if the previous year's garbage balance is an underpayment ( a negative value / may utang yung consumer)
 						if($total_garbage_bal <= 0){
+							//deduct garbage bill amount from the amount paid by the consumer
+							
+							$garbage_overpayment = $garbage - $bill_garbage_amount;
 							//add the excess to the underpayment
 							$total_garbage_bal = $total_garbage_bal + $garbage_overpayment;
 						}else{
-						//if the previous elec balance is an overpayment (positive value), we should deduct the excess from the overpayment
-							$total_garbage_bal = $total_garbage_bal + $garbage_overpayment;
+						//if the previous garbage balance is an overpayment (positive value), we should add the excess amount
+							$total_garbage_bal = $total_garbage_bal - $garbage;
 						}
 	  				}
-	  				//else if the consumer has an underpayment for the current month
+	  				//else if consumer's payment is less than the garbage bill amount for the current month
 	  				else if($garbage < $bill_garbage_amount){
-	  					$garbage_current_balance = $bill_garbage_amount - $garbage;
-						//and if the previous elec balance is an underpayment (negative value)
+	  					
+						//and if the previous year's garbage balance is an underpayment (negative value) / may utang si consumer
 						if($total_garbage_bal <= 0){
+							$garbage_current_balance = $bill_garbage_amount - $garbage;
 							//add to the underpayment
 							$total_garbage_bal = $total_garbage_bal - $garbage_current_balance;
+						}else{
+							//if the previous garbage balance is an overpayment (positive value), we should add the excess amount
+							$total_garbage_bal = $total_garbage_bal - $garbage;
 						}
-	  					
+	  				
 	  				}
 
 	  				//update the current year's balance in the database
@@ -1127,45 +1160,7 @@
   			
   		}//end of function
 
- 		/* OLD VERSION
- 		function add_payment_to_consumer_collection($bill_id,$electricity,$water,$garbage,$receiptNo,$receiptDate,$date_added){
-  				$data=array(
-		    		'bill_id'=>$bill_id,
-		    		'electricity_amount_paid'=>$electricity,
-		    		'water_amount_paid'=>$water,
-		    		'garbage_amount_paid'=>$garbage,
-		    		'receipt_number'=>$receiptNo,
-		    		'receipt_date'=>$receiptDate,
-		    		'date_added'=>$date_added
-					);
-
-	  			$this->db->insert('consumer_collection',$data);
-
-	  			$query = $this->db->query("select electricity_reading from consumer_bill where id=".$bill_id);
-	  			$temp_elec = $query->result_array();
-	  			$query = $this->db->query("select water_reading from consumer_bill where id=".$bill_id);
-	  			$temp_water = $query->result_array();
-	  			$query = $this->db->query("select garbage_fee from consumer_bill where id=".$bill_id);
-	  			$temp_garbage = $query->result_array();
-	  			//print_r($temp_garbage);
-	  			$bill_garbage_amount = $temp_garbage[0]['garbage_fee'];
-	  			$bill_elec_amount = $temp_elec[0]['electricity_reading'];
-	  			$bill_water_amount = $temp_water[0]['water_reading'];
-	  		 	//echo "<br><br>BILL E:".$bill_elec_amount." W: ".$bill_water_amount." G: ".$
-	  		 	//echo $bill_garbage_amount;
-
-	  		 	if($bill_elec_amount==$electricity && $bill_water_amount==$water && $bill_garbage_amount==$garbage){
-	  				$data=array(
-	    				'is_paid'=>1
-					);
-		  			$this->db->where('id',$bill_id);
-		  			$this->db->update('consumer_bill',$data);
-	  			}
-
-
-	  	// 		
-  			
-  		}//end of function*/
+ 		
 
   		function get_collections_for_edit($billID){
 	

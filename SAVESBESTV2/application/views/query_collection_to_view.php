@@ -298,19 +298,20 @@ function focusElecBal() {
      i++;
   }
   mod_elec_amt = document.getElementById("electricity_amount_paid").value;
+  console.log(mod_elec_amt);
 }
 
 function changeElecBal(newElecVal){
   var elec_bal = document.getElementById("electric_balance").value;
-  
+     // console.log("1  elec bal: "+elec_bal);
   if(elec_bal < 0){	//if underpayment (negative balance)
 	  var diff = parseFloat(mod_elec_amt).toFixed(2) - parseFloat(newElecVal).toFixed(2);
 	  elec_bal = parseFloat(elec_bal) - parseFloat(diff.toFixed(2));
-	  //console.log("diff: "+diff+" elec bal: "+elec_bal);
+	 // console.log("diff: "+diff+" elec bal: "+elec_bal);
   }else{		//else if overpayment (positive balance)
-	var diff = parseFloat(mod_elec_amt).toFixed(2) - parseFloat(newElecVal).toFixed(2);
-	  elec_bal = parseFloat(elec_bal) - parseFloat(diff.toFixed(2));
-	  //console.log("2 diff: "+diff+" elec bal: "+elec_bal);
+	   var diff = parseFloat(mod_elec_amt).toFixed(2) - parseFloat(newElecVal).toFixed(2);
+    elec_bal = parseFloat(elec_bal) + parseFloat(diff.toFixed(2));
+	 // console.log("2 diff: "+diff+" elec bal: "+elec_bal);
   }
   document.getElementById('electric_balance').value = elec_bal.toFixed(2);
 }
@@ -333,7 +334,7 @@ function changeWaterBal(newWaterVal){
 	  //console.log("diff: "+diff+" elec bal: "+elec_bal);
   }else{		//else if overpayment (positive balance)
 	 var diff = parseFloat(mod_water_amt).toFixed(2) - parseFloat(newWaterVal).toFixed(2);
-  	water_bal = parseFloat(water_bal) - parseFloat(diff.toFixed(2));
+  	water_bal = parseFloat(water_bal) + parseFloat(diff.toFixed(2));
   }
   
   document.getElementById('water_balance').value = water_bal.toFixed(2);
@@ -357,7 +358,7 @@ function changeGarbageBal(newGarbageVal){
 	  //console.log("diff: "+diff+" elec bal: "+elec_bal);
   }else{		//else if overpayment (positive balance)
 	 var diff = parseFloat(mod_garbage_amt).toFixed(2) - parseFloat(newGarbageVal).toFixed(2);
-  	  garbage_bal = parseFloat(garbage_bal) - parseFloat(diff.toFixed(2));
+  	  garbage_bal = parseFloat(garbage_bal) + parseFloat(diff.toFixed(2));
   }
  
   document.getElementById('garbage_balance').value = garbage_bal.toFixed(2);
